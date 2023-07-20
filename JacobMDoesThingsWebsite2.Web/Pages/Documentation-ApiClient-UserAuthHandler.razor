@@ -1,0 +1,52 @@
+﻿@attribute [Route(ApiClientUserAuthorizationHandlerURI)]
+
+<BaseForSideBarContent>
+    <HeaderForSideBarContent>
+        Authorization Delegate for Api Calls From Users
+    </HeaderForSideBarContent>
+    <ContentBlockForSideBarContent>
+        I use a <b>DelegatingHandler</b> for making protected Api calls. This handler is used to intercept
+        calls from a <b>HttpClient</b> and add appropriate authorization headers. The <b>DelegatingHandler</b>
+        for signed-in users requires a token to be cached, an example on configuring authorization can be found 
+        <a class="hover:underline brand-color" href="@AuthZAuthNOptionAuthenticationWithIdentityURI" target="_blank">here</a>, 
+        and another <a class="hover:underline brand-color" href="@AuthZAuthNRequireAuthenticationURI" target="_blank">here.</a>
+        These tokens can be accessed via the <b>ITokenAcquistion</b> interface. Here is a basic example of what this looks like. 
+    </ContentBlockForSideBarContent>
+    <CodeSnippetForSideBarContent>
+public class UserAuthorizationHandler : DelegatingHandler
+{
+    private readonly ITokenAcquisition _tokenAcquisition;
+    private readonly string[] _scopes;
+
+    public UserAuthorizationHandler(ITokenAcquisition tokenAcquisition, B2CClient client)
+    {
+        _tokenAcquisition = tokenAcquisition;
+        _scopes = client.UserScopes ?? throw new NullReferenceException(nameof(client.UserScopes));
+    }
+
+    protected override async Task&lt;HttpResponseMessage&gt; SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+    {
+        // Acquire the access token. The GetAccessTokenForUserAsync method requires an array of scopes with an optional authentication scheme.
+        // The scheme should be specified in the case that you may have multiple schemes in your application.
+        string authorizationHeader = await _tokenAcquisition.GetAccessTokenForUserAsync(_scopes, authenticationScheme: OpenIdConnectDefaults.AuthenticationScheme);
+
+        // Use the access token to call a protected web API.
+        // Add the Authorization token to the Authorization header with the value of "Bearer " + authorizationHeader.
+        // Note the space in the "Bearer " string, don't forget this or you may have problems.
+        request.Headers.Add("Authorization", "Bearer " + authorizationHeader);
+
+        // Now we pass the modified HttpRequestMessage back to the caller.
+        return await base.SendAsync(request, cancellationToken);
+    }
+}
+    </CodeSnippetForSideBarContent>
+    <ContentBlockForSideBarContent>
+        That is all there is to it, you probably want to add some exception handling and logging here, particularly when you are attempting to retrieve the
+        token with GetAccessTokenForUserAsync. This is how I use this handler in my CompositionRoot / Program file. The UserOdataServiceCaller can be found 
+        <a class="hover:underline brand-color" href="@ApiClientOdataServiceCallerURI" target="_blank">here.</a> Don't let naming confuse you, I have service
+        callers for both my server and signed-in users, the interface below and it's implementation are just representations of what I linked above.
+    </ContentBlockForSideBarContent>
+    <CodeSnippetForSideBarContent>
+services.AddHttpClient&lt;IODataServiceCaller, IOdataServiceCaller&gt;().AddHttpMessageHandler&lt;UserAuthorizationHandler&gt;();
+    </CodeSnippetForSideBarContent>
+</BaseForSideBarContent>

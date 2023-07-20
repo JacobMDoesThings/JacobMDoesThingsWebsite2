@@ -1,0 +1,62 @@
+﻿@inherits LayoutComponentBase
+@inject IConsentServiceManager LocalStorageService;
+
+<AppBar />
+<SideNav />
+<PrivacyDialog IsVisible="_showPrivacyDialog" UpdateCallback="(bool value) => UpdatePrivacyEvent(value)" 
+    Consent="_consentHasBeenGiven"/>
+<div class="page bg-dark" style="padding-top:5rem">
+    <main class="max-h mb-16" >
+        <article class="content px-4" >
+            @Body
+        </article>
+    </main>
+    <Footer PrivacyPolicyClickCallback="PrivacyPolicyClickEvent" />
+</div>
+
+@code {
+    private bool _showPrivacyDialog = false;
+    private bool _consentHasBeenGiven;
+
+    ///<inheritdoc />
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!(await LocalStorageService.GetConsentHasBeenRequestedAsync()))
+        {
+            _showPrivacyDialog = true;
+            await InvokeAsync(StateHasChanged);
+        }
+
+        _consentHasBeenGiven = await LocalStorageService.GetConsentHasBeenGivenAsync();
+    }
+
+    protected override Task OnInitializedAsync()
+    {
+        LocalStorageService.PropertyChanged += OnConsentChangedAsync;
+        return base.OnInitializedAsync();
+    }
+
+    private async Task UpdatePrivacyEvent(bool value)
+    {
+        await LocalStorageService.SetConsentHasBeenRequestedAsync();
+        await LocalStorageService.SetConsentHasBeenGivenAsync(value);
+
+        _showPrivacyDialog = false;
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private void PrivacyPolicyClickEvent()
+    {
+        _showPrivacyDialog = true;
+    }
+
+    private async void OnConsentChangedAsync(object? sender, PropertyChangedEventArgs args)
+    {
+        if (args.PropertyName == nameof(LocalStorageService.GetConsentHasBeenGivenAsync))
+        {
+            _consentHasBeenGiven = await LocalStorageService.GetConsentHasBeenGivenAsync();
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+
+}

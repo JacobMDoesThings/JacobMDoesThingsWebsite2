@@ -1,0 +1,98 @@
+﻿@inject IServiceODataServiceCaller Service;
+
+<RadzenDataGrid @ref="_grid" KeyProperty="Id" IsLoading="@_mainIsLoading" 
+                Count="@_count" Data="@_sessions" LoadData="@LoadData" FilterPopupRenderMode="PopupRenderMode.OnDemand"
+                FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" FilterMode="FilterMode.Advanced"
+                AllowSorting="true" AllowFiltering="true" AllowPaging="true" PageSize="@_pageSize" PagerHorizontalAlign="HorizontalAlign.Center"
+                AllowColumnResize="true" TItem="SessionInformationDTO" RowExpand="RowExpand"
+                ExpandMode="DataGridExpandMode.Single">
+    <Template Context="session">
+        <RadzenDataGrid @ref="_subGrid" AllowColumnResize="true" IsLoading="@_subIsLoading" Data="@session.PageVisits" TItem="PageVisitDTO">
+            <Columns>
+                <RadzenDataGridColumn TItem="PageVisitDTO" Property="@nameof(PageVisitDTO.URI)" Title="URI" />
+                <RadzenDataGridColumn TItem="PageVisitDTO" Property="@nameof(PageVisitDTO.StartTime)" Title="Start Time" />
+                <RadzenDataGridColumn TItem="PageVisitDTO" Property="@nameof(PageVisitDTO.EndTime)" Title="End Time" />
+                <RadzenDataGridColumn TItem="PageVisitDTO" Property="TotalTime" Filterable="false" Title="Time Spent (HH:MM:SS)" Frozen="true" TextAlign="TextAlign.Center">
+                    <Template Context="time">
+                        @{
+                            <span>@TimeSpent(time.StartTime, time.EndTime)</span>
+                        }
+                    </Template>
+                </RadzenDataGridColumn>
+            </Columns>
+        </RadzenDataGrid>
+    </Template>
+    <Columns>
+        <RadzenDataGridColumn TItem="SessionInformationDTO" Property="@nameof(SessionInformationDTO.Id)" Filterable="true" Title="Id" Frozen="true" TextAlign="TextAlign.Center" />
+        <RadzenDataGridColumn TItem="SessionInformationDTO" Property="@nameof(SessionInformationDTO.TrackingId)" Filterable="true" Title="Tracking Id" Frozen="true"  TextAlign="TextAlign.Center" />
+        <RadzenDataGridColumn TItem="SessionInformationDTO" Property="@nameof(SessionInformationDTO.UserAgent)" Filterable="true" Title="User Agent" Frozen="true" TextAlign="TextAlign.Center" />
+    </Columns>
+</RadzenDataGrid>
+@code {
+    private IEnumerable<SessionInformationDTO>? _sessions;
+    private int _count;
+    private bool _mainIsLoading;
+    private bool _subIsLoading;
+    private RadzenDataGrid<SessionInformationDTO> _grid = new();
+    private RadzenDataGrid<PageVisitDTO> _subGrid = new();
+    private int _pageSize = 15;
+
+    ///<inheritdoc />
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        base.OnAfterRender(firstRender);
+        if (firstRender)
+        {
+            if (_sessions is not null)
+            {
+                var expandSession = _sessions.FirstOrDefault();
+
+                if (expandSession is not null)
+                {
+                    await _grid.ExpandRow(expandSession);
+                }
+            }
+        }
+    }
+
+    private string TimeSpent(DateTimeOffset startTime, DateTimeOffset endTime)
+    {
+
+        var diff = endTime.Subtract(startTime);
+        return string.Format("{0:00}:{1:00}:{2:00}",
+                diff.Hours, diff.Minutes, diff.Seconds);
+    }
+
+    private async Task LoadData(LoadDataArgs args)
+    {
+        _mainIsLoading = true;
+
+        //GetODataUri extension method requires UriKind.Absolute.
+        //This is to trick it to allow me to later parse the odata query.
+        var uri = new Uri("https://fakeuri.com");
+
+        //Create Odata Uri + Query.
+        uri = uri.GetODataUri(filter: args.Filter, top: args.Top, skip: args.Skip, orderby: args.OrderBy, count: true);
+
+        //Extract Query.
+        string query = uri.Query;
+
+        var result = await Service.GetSessionInformationAsync($"{query}");
+        _sessions = result.Data.AsODataEnumerable<SessionInformationDTO>();
+
+        _count = result.Count;
+        _mainIsLoading = false;
+    }
+
+    private async Task RowExpand(SessionInformationDTO session)
+    { 
+        _subIsLoading = true;
+
+        if (session.PageVisits == null || session.PageVisits.Count() < 1)
+        {
+            session.PageVisits = (await Service.GetSessionInformationAsync($"?$filter=id eq '{session.Id}'&$expand=PageVisits")).Data!.FirstOrDefault()!.PageVisits;
+        }
+        _subIsLoading = false;
+    }
+
+}

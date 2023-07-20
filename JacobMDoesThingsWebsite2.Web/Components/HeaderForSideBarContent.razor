@@ -1,0 +1,20 @@
+﻿<div class="grid grid-cols-1 gap-4 mb-4 bg-black ">
+    <div class="flex items-center justify-center h-24 rounded bg-gray-50 border-2 border-brand">
+        <h1 class="text-2xl text-gray-800">
+            @{
+                if (ChildContent is not null)
+                {
+                    @ChildContent;
+                }
+            }
+        </h1>
+    </div>
+</div>
+
+@code {
+    /// <summary>
+    /// Gets or sets the sole <see cref="RenderFragment"/>.
+    /// </summary>
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+}

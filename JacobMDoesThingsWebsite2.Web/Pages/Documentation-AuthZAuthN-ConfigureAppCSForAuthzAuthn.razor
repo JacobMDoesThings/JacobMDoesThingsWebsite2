@@ -1,0 +1,58 @@
+﻿@attribute [Route(AuthZAuthNConfigureAppCSURI)]
+
+<BaseForSideBarContent>
+    <HeaderForSideBarContent>
+        Configure App.CS for Authorization
+    </HeaderForSideBarContent>
+    <ContentBlockForSideBarContent>
+        Blazor requires that the App.cs is configured in a way to make use of authorization. This is accomplished by way of an AuthorizeRouteView component. The snipped provided here is a basic App.cs example implementing the AuthorizeRouteView Component.
+        Note that there instead of a RouteView, AuthorizeRouteView is used.
+    </ContentBlockForSideBarContent>
+    <CodeSnippetForSideBarContent>
+&lt;CascadingAuthenticationState&gt;
+    &lt;Router AppAssembly="@typeof(App).Assembly"&gt;
+        &lt;Found Context="routeData"&gt;
+            &lt;AuthorizeRouteView RouteData="&#64;routeData" DefaultLayout="@typeof(MainLayout)"&gt;
+                &lt;NotAuthorized&gt;
+                    &lt;div class="p-4 md:ml-64 brand-color">
+                        Unauthorized.
+                    &lt;/div&gt;
+                &lt;/NotAuthorized&gt;
+            &lt;/AuthorizeRouteView&gt;
+        &lt;/Found&gt;
+        &lt;NotFound&gt;
+            &lt;PageTitle&gtNot found&lt;/PageTitle&gt;
+            &lt;LayoutView Layout="&#64;typeof(MainLayout)"&gt;
+                &lt;p role="alert">Sorry, there is nothing at this address.&lt;/p&gt;
+            &lt;/LayoutView&gt;
+        &lt;/NotFound&gt;
+    &lt;/Router&gt;
+&lt;/CascadingAuthenticationState>
+    </CodeSnippetForSideBarContent>
+    <ContentBlockForSideBarContent>
+        Alternatively, you may redirect a user to login when they attempt to access a protected resource. You must inject the NavigationManager and add NavigationManager.NavigateTo("login"). The "login"
+        part represents your login redirect endpoint such as "/MicrosoftIdentity/Account/SignIn" as shown here.
+    </ContentBlockForSideBarContent>
+    <CodeSnippetForSideBarContent>
+&#64;inject NavigationManager NavigationManager;
+
+&lt;CascadingAuthenticationState&gt;
+    &lt;Router AppAssembly="@typeof(App).Assembly"&gt;
+         &lt;Found Context="routeData"&gt;
+            &lt;AuthorizeRouteView RouteData="&#64;routeData" DefaultLayout="@typeof(MainLayout)"&gt;
+                &lt;NotAuthorized&gt;
+                    NavigationManager.NavigateTo("/MicrosoftIdentity/Account/SignIn");
+                &lt;/NotAuthorized&gt;
+            &lt;/AuthorizeRouteView&gt;
+        &lt;/Found&gt;
+        &lt;NotFound&gt;
+            &lt;PageTitle&gtNot found&lt;/PageTitle&gt;
+            &lt;LayoutView Layout="&#64;typeof(MainLayout)"&gt;
+                &lt;p role="alert">Sorry, there is nothing at this address.&lt;/p&gt;
+            &lt;/LayoutView&gt;
+        &lt;/NotFound&gt;
+    &lt;/Router&gt;
+&lt;/CascadingAuthenticationState>
+    </CodeSnippetForSideBarContent>
+
+</BaseForSideBarContent>

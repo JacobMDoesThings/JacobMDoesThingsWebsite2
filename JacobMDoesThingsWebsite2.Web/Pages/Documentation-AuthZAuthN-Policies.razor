@@ -1,0 +1,117 @@
+﻿@attribute [Route(AuthZAuthNPoliciesURI)]
+
+<BaseForSideBarContent>
+    <HeaderForSideBarContent>
+        Policy Configuration
+    </HeaderForSideBarContent>
+    <ContentBlockForSideBarContent>
+        Policies are useful for when you need to create a system for authorization when either the authorization isn't based on a roles 
+        or on complex role assignments. For example, you may create polices that leverage claims or usernames, alternatively, you may 
+        also create a policy that requires multiple roles. I think a strong case for policies appears when you need to consolidate roles
+        such as reader and writer for content or when you need to work with more than one provider for authorization. <br /> <br />
+        One such example is when I worked on a project that leveraged Azure B2C. In this scenario I needed to allow users to apply for
+        special access without having multiple login providers and endpoints. This was accomplished by adding users to the organization 
+        and to a group in the organization. This is fine, but the token returned with the application doesn't return the groups in which
+        the user belongs.<br /><br />
+
+        An in depth guide on Policy-Based authorization in ASP.NET Core written by Microsoft can be found 
+        <a class="hover:underline brand-color" target="_blank" href="https://learn.microsoft.com/en-us/aspnet/core/security/authorization/policies?view=aspnetcore-7.0">here.</a>
+    </ContentBlockForSideBarContent>
+    <CodeSnippetForSideBarContent>
+//This is a simple example of how to create a policy called "ReaderWriter" that requires 
+//both claims "Reader" and "Writer".
+services.AddAuthorization(options =>
+    options.AddPolicy("ReaderWriter",
+    policy => policy.RequireClaim("Reader", "Writer")));
+
+//Here is another requiring a specific user name. The policy name is "MustBeSpecificUserName" and the allowed user name is "UserName".
+ services.AddAuthorization(options =>
+        options.AddPolicy("MustBeSpecificUserName",
+        policy => policy.RequireUserName("UserName")));
+
+//Yet another leveraging roles with the Policy name "RequiredRole" with the role required being "RoleName".
+ services.AddAuthorization(options =>
+        options.AddPolicy("RequiredRole",
+        policy => policy.RequireRole("RoleName")));
+
+//Finally, this is an example of adding all three policies at once.
+services.AddAuthorization(options =>
+{
+    {
+        options.AddPolicy("ReaderWriter",
+        policy => policy.RequireClaim("Reader", "Writer"));
+    }
+    {
+        options.AddPolicy("MustBeSpecificUserName",
+        policy => policy.RequireUserName("UserName"));
+    }
+    {
+        options.AddPolicy("RequiredRole",
+        policy => policy.RequireRole("RoleName"));
+    }
+});
+    </CodeSnippetForSideBarContent>
+    <ContentBlockForSideBarContent>
+        This is great for simple requirements, there are times where custom handlers are required. These custom handlers have a few
+        parts but give flexibily in how you can build policies. <br /><br />
+        The first thing I needed to do was create an IAuthorizationRequirement implementation, this will allow me to use a custom 
+        requirement when creating Policies. I also need to create a AuthorizationHandler that leverages the custom IAuthorizationRequirement.
+        Finally, I must add the service in the CompositionRoot / Program.cs file.
+    </ContentBlockForSideBarContent>
+    <CodeSnippetForSideBarContent>
+//This is creating requirement that requires a GroupName and a GroupID, if I remember correctly, both were necessary for GraphAPI.
+public class MemberOfSecurityGroupRequirement : IAuthorizationRequirement
+{
+    public readonly string GroupId;
+    public readonly string GroupName;
+
+    public MemberOfSecurityGroupRequirement(string groupName, string groupId)
+    {
+        GroupName = groupName;
+        GroupId = groupId;
+    }
+}
+//This is a basic implementation ensuring that the user has a claim matching the group id.
+public class IsInGroupHandlerUsingAzureGroups : AuthorizationHandler&lt;MemberOfSecurityGroupRequirement&gt;
+{
+    protected override Task HandleRequirementAsync(AuthorizationHandlerContext context, MemberOfSecurityGroupRequirement requirement)
+    {
+        //Just a quick check to ensure that neither of these are null as they are both required.
+        if (context is null)
+            throw new ArgumentNullException(nameof(context));
+        if (requirement is null)
+            throw new ArgumentNullException(nameof(requirement));
+        
+        //This checks the User claims for "group" where the group value is the provided GroupId from the MemberOfSecurityGroupRequirement above.
+        //If group is not found or it is found and there is not a group id equal to the required group id then the member is not part of the
+        //group and the LINQ will provide a null value to claimIdentityProvider variable.
+        var claimIdentityprovider = context.User.Claims.FirstOrDefault(t => t.Type == "group"
+            && t.Value == requirement.GroupId);
+
+        //If member is not in the required group then claimIdentityProvider will be null.
+        if (claimIdentityprovider is not null)
+        {
+            context.Succeed(requirement);
+        }
+
+        return Task.CompletedTask;
+    }
+}
+
+//Finally, we add this to the CompositionRoot / Program.cs
+services.AddSingleton&lt;IAuthorizationHandler, IsInGroupHandlerUsingAzureGroups&gt;();
+    </CodeSnippetForSideBarContent>
+    <ContentBlockForSideBarContent>
+        After all this is created we need to configure Authorization to use these requirements. This is how you do that.
+    </ContentBlockForSideBarContent>
+    <CodeSnippetForSideBarContent>
+services.AddAuthorization(options =>
+{
+    options.AddPolicy("TheRequirementPolicyName", policy =>
+    {
+        policy.Requirements.Add(new MemberOfSecurityGroupRequirement("TheDefinedSecurityGroupName",
+        "TheDefinedSecurityGroupId"));
+    });
+});
+    </CodeSnippetForSideBarContent>
+</BaseForSideBarContent>

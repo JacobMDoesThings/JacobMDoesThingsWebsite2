@@ -1,0 +1,64 @@
+﻿@inject NavigationManager NavigationManager
+
+<footer class="fixed bottom-0 z-20 @_offsetCss w-full p-2 bg-dark border-t border-brand shadow md:flex md:items-center md:justify-between md:p-2 dark:bg-gray-800 dark:border-gray-600">
+
+    <span class="text-sm text-gray-500 sm:text-center dark:text-gray-400">
+        © @_year <span class="hover:underline">@WebsiteURL™</span>. All Rights Reserved.
+    </span>
+    <ul class="flex flex-wrap items-center mt-3 text-sm font-medium text-gray-500 dark:text-gray-400 sm:mt-0 @_privacyOffsetCss">
+        <li>
+            <button class="mr-4 hover:underline md:mr-6 brand-color" @onclick="PrivacyPolicyClickCallback">Privacy Policy</button>
+        </li>
+    </ul>
+</footer>
+
+@code {
+    private readonly string _offsetValue = "md:ml-64";
+    private readonly string _privacyOffsetValue = "md:mr-64";
+    private string _offsetCss = string.Empty;
+    private string _privacyOffsetCss = string.Empty;
+    private string _year = DateTime.Now.Year.ToString();
+
+    /// <summary>
+    /// Gets or sets the <see cref="EventCallback"/> for event relating
+    /// to displaying the privacy policy.
+    /// </summary>
+    [Parameter]
+    public EventCallback PrivacyPolicyClickCallback { get; set; }
+
+    ///<inheritdoc />
+    protected override void OnInitialized()
+    {
+        if (NavigationManager is not null)
+        {
+            NavigationManager.LocationChanged += LocationChangedHandler;
+        }
+    }
+
+    ///<inheritdoc />
+    protected override Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            CheckAndSetCss();
+        }
+
+        return base.OnAfterRenderAsync(firstRender);
+    }
+
+    private void LocationChangedHandler(object? o, EventArgs e)
+    {
+        CheckAndSetCss();
+    }
+
+    private void CheckAndSetCss()
+    {
+
+        bool isInSideBarEnabledRoute = NavigationManager.ToBaseRelativePath(NavigationManager.Uri).IsInSideBarEnabledRoutes();
+
+        _offsetCss = isInSideBarEnabledRoute ? _offsetValue : string.Empty;
+        _privacyOffsetCss = isInSideBarEnabledRoute ? _privacyOffsetValue : string.Empty;
+        InvokeAsync(StateHasChanged);
+    }
+
+}

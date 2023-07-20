@@ -1,0 +1,116 @@
+﻿@attribute [Route(DataCollectionConsentManagementUIURI)]
+<BaseForSideBarContent>
+    <HeaderForSideBarContent>
+        Consent Management UI
+    </HeaderForSideBarContent>
+    <ContentBlockForSideBarContent>
+        This is the UI implementation for the 
+        <a class="hover:underline brand-color" href="@DataCollectionConsentManagerURI">DataCollectionService found here.</a>
+        The UI is required to display a request for data collection when a request hasn't been made or has been forgotten, like when
+        the browser cache is cleared. The UI also must provide a way for a user to easily update preferences and view the privacy policy.
+        <br /><br />
+        First, I will discuss the component that displays the usage of data and allows a user to opt in or out of optional data collection. To
+        avoid filling the this page with CSS HTML and text, I will primary focus on the behavior. This behavior should be flexible enough
+        to at least give direction for future implementations.
+        <br /><br />
+        This is the code behind for the dialog popup that is used on this site...
+    </ContentBlockForSideBarContent>
+    <CodeSnippetForSideBarContent>
+private bool _consent = true;
+
+/// &lt;summary&gt;
+/// Gets or sets the &lt;see cref="EventCallback"/&gt; for updating privacy preferences.
+/// &lt;/summary&gt;
+[Parameter]
+public EventCallback&lt;bool&gt; UpdateCallback { get; set; }
+
+/// &lt;summary&gt;
+/// Gets or sets a value indicating whether this dialog should be visible or not.
+/// &lt;/summary&gt;
+[Parameter]
+public bool IsVisible { get; set; }
+
+private void ToggleOptionalConsent()
+{
+    _consent = !_consent;
+}
+
+private async Task Update()
+{
+    await UpdateCallback.InvokeAsync(_consent);
+}
+    </CodeSnippetForSideBarContent>
+    <ContentBlockForSideBarContent>
+        As you can see the component has simple logic. The <b>EventCallback&lt;bool&gt;</b>, named
+        UpdateCallback provides a parameter that allows a calling component to dictate what happens when Update is called, of which is called when 
+        the only <b>button</b> on this component is clicked. The UpdateCallback is invoked by the Update method and provide the value of the _consent
+        field. The _consent field value is set to true initially and then toggled by ToggleOptionalConsent, which is fired whenever a user toggles the
+        associated <b>checkbox</b>. I took this approach to avoid taking a dependency, such as the  
+        <a class="hover:underline brand-color" href="@DataCollectionConsentManagerURI">DataCollectionService</a> and instead, allow for flexibility on
+        the implementation of consent management. The IsVisible parameter is passed by the containing component to allow it to dictate the visibility
+        of this component as desired.
+        <br /><br />
+        So, for this site, the containing component determines if consent has been requested, if not it sets the visibility of this component to true.
+        Once this component's Update() is called, the containing component may then set the value that lets it know that consent has been requested to true.
+        When Update is invoked, the containing component will also recieve a <b>bool</b> via the <b>EventCallback</b> that contains the value of whether or
+        not consent has been given. The containing component may then update the consent value how it sees fit.
+        <br /><br />
+        In my case, the state of the consent is managed by the MainLayout which has a dependency on the
+        <a class="hover:underline brand-color" href="@DataCollectionConsentManagerURI">DataCollectionService</a>. The following example is the relevant details
+        that tie this component and the <a class="hover:underline brand-color" href="@DataCollectionConsentManagerURI">DataCollectionService</a> together.
+        <br /><br />
+        Here is how management is handled...
+    </ContentBlockForSideBarContent>
+    <CodeSnippetForSideBarContent>
+&#64;inject IConsentServiceManager LocalStorageService;
+
+&lt;PrivacyDialog IsVisible="_showPrivacyDialog" UpdateCallback="(bool value) =&gt; UpdatePrivacyEvent(value)" /&gt;
+
+&#64;code {
+    private bool _showPrivacyDialog = false;
+
+    ///&lt;inheritdoc /&gt;
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!(await LocalStorageService.GetConsentHasBeenRequestedAsync()))
+        {
+            _showPrivacyDialog = true;
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+
+    private void PrivacyPolicyClickEvent()
+    {
+        _showPrivacyDialog = true;
+    }
+
+    private async Task UpdatePrivacyEvent(bool value)
+    {
+        await LocalStorageService.SetConsentHasBeenRequestedAsync();
+        await LocalStorageService.SetConsentHasBeenGivenAsync(value);
+
+        _showPrivacyDialog = false;
+        await InvokeAsync(StateHasChanged);
+    }
+}
+    </CodeSnippetForSideBarContent>
+    <ContentBlockForSideBarContent>
+        Again, the implementation is simple with few moving parts. Starting with the OnAfterRenderAsync method, this method checks the 
+        <a class="hover:underline brand-color" href="@DataCollectionConsentManagerURI">DataCollectionService</a>, LocalStorageService to 
+        check if consent has been requested. If consent has not been requested I show the component that manages privacy. Because the DataCollectionService
+        implements <b>INotifyPropertyChanged</b> I could alternatively use events instead of OnAfterRenderAsync. This example is part of
+        my MainLayout class, I took this approach so that a visitor, visiting any valid page will be notified if consent hasn't been requested.
+        This solves the potential issue of people clearing cache in mid session or landing in the site in an arbitrary page. This dialog can also
+        be displayed manually by the user via the PrivacyPolicyClickEvent, which is bound to a link in the footer for my site.
+        <br /><br />
+        The last piece of my consent management system is the UpdatePrivacyEvent. This is passed as a parameter to the first component on this page
+        called UpdateCallback. Now, when the component clicks the update <b>button</b>, this component gets the return <b>bool</b> value and
+        triggers the logic in the UpdatePrivacyEvent method. 
+        <br /><br />
+        We know that if the UpdatePrivacyEvent is being fired that the user clicked the update <b>button</b>, this means they must have seen
+        the privacy policy and options so we call SetConsentHasBeenRequestedAsync. Also, with the value returned from the consent component we know
+        if the user has opted in or out and can call SetConsentHasBeenGivenAsync with the provided value. Finally, we hide the dialog and let components
+        know that state has been changed.
+        <br /><br />
+    </ContentBlockForSideBarContent>
+</BaseForSideBarContent>

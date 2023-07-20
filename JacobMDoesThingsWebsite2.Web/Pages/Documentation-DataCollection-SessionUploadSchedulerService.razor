@@ -1,0 +1,49 @@
+﻿@attribute [Route(DataCollectionSessionUploadSchedulerServiceURI)]
+
+<BaseForSideBarContent>
+    <HeaderForSideBarContent>
+        SessionUploadSchedulerService
+    </HeaderForSideBarContent>
+    <ContentBlockForSideBarContent>
+        The SessionUploadSchedulerService is responsible for posting user data to the configured API. This service works by allowing the
+        TODO- DataCollectionService to add a SessionInformation model to a queue, then at specified intervals, this service posts each model
+        to the TODO- ServiceClientCaller.
+        <br /><br />
+        Here is a brief example...
+    </ContentBlockForSideBarContent>
+    <CodeSnippetForSideBarContent>
+/// &lt;summary&gt;
+/// Adds a new &lt;see cref="SessionInformationDTO"/&gt; to a list to be managed by the service.
+/// &lt;/summary&gt;
+/// &lt;param name="sessionId"&gt;Must be a unique key representing the session.&lt;/param&gt;
+/// &lt;param name="sessionInformationDTO"&gt;The &lt;see cref="SessionInformationDTO"/&gt; to be saved.&lt;/param&gt;
+public void AddSessionInformationTask(string sessionId, SessionInformationDTO sessionInformationDTO)
+{
+    _sessionsReadyForUpload.TryAdd(sessionId, sessionInformationDTO);
+}
+
+private void StartUploadSessionsService()
+{
+    var autoEvent = new AutoResetEvent(true);
+
+    Timer intervalTimer = new(async (object? objectStatus) =&gt;
+    {
+        foreach (KeyValuePair&lt;string, SessionInformationDTO&gt; kvp in _sessionsReadyForUpload)
+        {
+            await _sessionFunctionsCaller.PostSessionInformationAsync(kvp.Value);
+        }
+
+        _sessionsReadyForUpload.Clear();
+
+    }, autoEvent, _sUSSoptions.DueTime, _sUSSoptions.IntervalTime);
+}
+    </CodeSnippetForSideBarContent>
+    <ContentBlockForSideBarContent>
+        The AddSessionInformationTask takes an id and a dto and stores these values in a Dictionary, the id is simply to prevent any funny business with 
+        the caller trying to add a session twice.
+        <br /><br />
+        The StartUploadSessionsService method is where the magic happens. Every 30 seconds via a <b>Timer</b>. The system iterates through the dictionary of ids and DTOs
+        posting each DTO to the service via PostSesssionInformationAsync TODO-ClientCaller. Since I am not concerned with lost data, I haven't provided
+        a failsafe to clear the dictionary after each call. I strongly suggest not doing this with important processes and data. This is all there is to this service.
+    </ContentBlockForSideBarContent>
+</BaseForSideBarContent>

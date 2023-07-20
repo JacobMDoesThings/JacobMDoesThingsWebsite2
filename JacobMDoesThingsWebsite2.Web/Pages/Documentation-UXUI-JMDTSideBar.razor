@@ -1,0 +1,359 @@
+﻿@attribute [Route(UXUIJMDTSideBarURI)]
+<BaseForSideBarContent>
+    <HeaderForSideBarContent>
+        Sidebar docs for JacobMDoesthings.com
+    </HeaderForSideBarContent>
+    <ContentBlockForSideBarContent>
+        The sidebar used throughout this site is from <a class="hover:underline brand-color" target="_blank" href="https://tailwind-elements.com/docs/standard/navigation/sidenav/">Tailwind-elements.com</a>
+        This sidebar uses Tailwind and Javascript, I thought I would give Tailwind a try; however, I will not be using Javascript since I am using Blazor.
+        because I am not a front-end guru and have a lot on my plate I only managed to configure the responsiveness and behavior of the sidebar and have not added
+        smooth or fancy transitions. Also, even though I have removed some unecessary html from the template I have not cleaned it out entirely. 
+        This should not have any meaningful effect on the overall experience. I want to add that some effort has been put into the css to get everything
+        to fit appropriately, but I will not be demonstrating this here.<br /><br />
+        The minimum criteria for the sidebar is as follows:<br />
+        <ol style="list-style:decimal; list-style-position:inside; font-style:italic; font-weight:lighter">
+            <li>
+                Sidebar must tuck away and display a toggle button when screen gets too small.
+            </li>
+            <li>
+                Sidebar must tuck away when it loses focus on smaller screens.
+            </li>
+            <li>
+                Sidebar must only exist on certain endpoints.
+            </li>
+            <li>
+                Sidebar must tuck away when a link is used.
+            </li>
+            <li>
+                Sidebar must highlight the link currently visited.
+            </li>
+            <li>
+                Sidebar must have toggles for sections and sub-sections.
+            </li>
+        </ol><br />
+        I'll start with sidebar tucking and toggle button visibility. Before I start there are a few things to go over. The first item is that the sidebar is
+        a single entity, meaning I am using the same sidebar for every endpoint, this is important to note because as the site grows I will change the content
+        of the sidebar but the sidebar will continue to be the same entity. Second, I am using a ViewModel to maintain most of the state and behavior of the 
+        component, so keep that in mind when looking through this page. Items 1 through 3 are covered in the following snippets.<br /><br />
+        <a class="hover:underline brand-color" target="_blank" href="@UXUIJMDTBaseVMBasePageURI">Here is where you can see the BasePage and BaseViewModel.</a>
+    </ContentBlockForSideBarContent>
+    <CodeSnippetForSideBarContent>
+//This here is the "HTML" of the sidebar.
+&#64;inherits BasePage&lt;SideNavVM&gt;
+&#64;{
+    //The IsInSidebarEnabledRoute checks to ensure the base address starts with an appropriate value like /Documentation.
+    if (VM!.IsInSidebarEnabledRoute())
+    {
+        //Notice the VM!.ToggleSideBar, the ViewModel that will be shown later manages the current bool state of the Sidebar. This feature does
+        //exactly what is expected and sets true to false and false to true for the value.
+        //As for the VM!.SideBarFocusOutHandler, this method simply checks to see if a link is being clicked before deciding the sidebar has lost
+        //focus, this is important because I couldn not get the sidenav to stop tucking away (losing focus) when an item was being clicked.
+        &lt;div class="bg-dark"&gt;
+            &lt;button &#64;onclick="VM!.ToggleSideBar" &#64;onfocusout="VM!.SideBarFocusOutHandler" data-drawer-target="default-sidebar" 
+            data-drawer-toggle="default-sidebar" aria-controls="default-sidebar" type="button" class="inline-flex items-center p-2 mt-2 
+            //Here where it has the the value md:hidden, the button is visible except when the view is medium or larger, this is for the responsive
+            //layout.
+            ml-3 text-sm text-gray-500 rounded-lg md:hidden hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200 dark:text-gray-400 
+            dark:hover:bg-gray-700 dark:focus:ring-gray-600"&gt;
+                &lt;span class="sr-only"&gt;Open sidebar&lt;/span&gt;
+                &lt;svg class="w-6 h-6" aria-hidden="true" fill="white" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"&gt;
+                    &lt;path clip-rule="evenodd" fill-rule="evenodd" d="M2 4.75A.75.75 0 012.75 4h14.5a.75.75 0 010 1.5H2.75A.75.75 0 012 4.75zm0 
+                    10.5a.75.75 0 01.75-.75h7.5a.75.75 0 010 1.5h-7.5a.75.75 0 01-.75-.75zM2 10a.75.75 0 01.75-.75h14.5a.75.75 0 010 1.5H2.75A.75.75 
+                    0 012 10z"&gt;&lt;/path&gt;
+                &lt;/svg&gt;
+             &lt;/button&gt;
+         &lt;/div&gt;
+
+        //To set the sidebar being opened or close I check the ViewModel ShowSideBar value. A string is inserted into the css for the sidebar, 
+        //the value of the string is determined by the ShowSideBar state in the ViewModel. If this value is true then the bar is opened else
+        //it translates its width left to hide.
+        string showSideBarCSS = VM!.ShowSideBar ? "" : "-translate-x-full";
+
+        //What I am doing here is when a mouse is pressed down, I set the IsFocusedOnMenuItem to true, taking this action will allow the 
+        //SideBarFocusOutHandler know that it should not set the visibility to false. It is important to do this OnMouseDown because it 
+        //happens before on focus out, which apparently occurs any time you click anywhere in this situation. OnFocusOut here will signal the 
+        //SideBarFocusOutHandler VM Method to be called. This will set the sidebar visibility property to false UNLESS IsFocusedOnMenuItem is 
+        //true, which happens when you click inside the sidebar.
+        &lt;aside &#64;onmousedown="() =&gt; VM.IsFocusedOnMenuItem = true" &#64;onfocusout="VM.SideBarFocusOutHandler" class="fixed top-0 left-0 
+        //The css for the sidebar visibility is inserted here. Note that the variable showSideBarCSS is before md:translate-x-0, this is because
+        //md:translate-x-0 takes precidence over the variable. Because of this, anytime the screen is medium or larger it will always be visible.
+        z-40 w-64 h-screen transition-transform &#64;showSideBarCSS md:translate-x-0" aria-label="Sidebar"&gt;
+            &#64;{
+                if (VM.ShowDocumentationSideNav)
+                {
+                    &lt;DocumentationNavigationItems NavigationManager="NavigationManager" CurrentURI="&#64;VM!.CurrentLocation" /&gt;
+                }
+            }
+        &lt;/aside&gt;
+    }
+}
+    </CodeSnippetForSideBarContent>
+    <ContentBlockForSideBarContent>
+        There are a few things to unpack here outside of the basic HTML and CSS. You should notice the VM! calls, this is the ViewModel discussed earlier. 
+        The ViewModel is injected as a scoped service and injected via the <b>BasePage&lt;SideNavVM&gt;</b> presented at the top. Here is the ViewModel in full.
+        With this you may be able to discern the logic described above.<br /><br />
+        <a class="hover:underline brand-color" target="_blank" href="@UXUIJMDTBaseVMBasePageURI">Here is where you can see the BasePage and BaseViewModel.</a>
+    </ContentBlockForSideBarContent>
+    <CodeSnippetForSideBarContent>
+/// &lt;summary&gt;
+/// Viewmodel for the state and behavior of the &lt;see cref="SideNav"/&gt;.
+/// &lt;/summary&gt;
+public class SideNavVM : BaseViewModel
+{
+    private bool _authZAuthNToggle;
+    private bool _uIUXToggle;
+    private string _currentLocation = string.Empty;
+
+    /// &lt;summary&gt;
+    /// Gets or sets the CurrentLocation (URI)
+    /// &lt;/summary&gt;
+    public string CurrentLocation
+    {
+        get
+        {
+            return _currentLocation;
+        }
+        set
+        {
+            _currentLocation = value;
+            ShowDocumentationSideNav = CurrentLocation.StartsWith(DocumentationURI.Trim('/'), StringComparison.OrdinalIgnoreCase);
+            OnPropertyChanged();
+        }
+    }
+
+    /// &lt;summary&gt;
+    /// Gets a value indicating whether the CurrentLocation is in a route that should show the &lt;see cref="SideNav"/&gt;
+    /// &lt;/summary&gt;
+    /// &lt;returns&gt;&lt;/returns&gt;
+    public bool IsInSidebarEnabledRoute()
+    {
+        foreach (var uri in SidebarEnabledRoutes)
+        {
+            if ($"/{CurrentLocation}".StartsWith(uri, StringComparison.OrdinalIgnoreCase))
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /// &lt;summary&gt;
+    /// Gets or sets a value indicating whether the Sidenav should show documentation elements.
+    /// &lt;/summary&gt;
+    public bool ShowDocumentationSideNav { get; set; }
+
+    /// &lt;summary&gt;
+    /// Gets or sets a value indicating the visibility of the &lt;see cref="SideNav"/&gt;.
+    /// &lt;/summary&gt;
+    public bool ShowSideBar { get; set; } = false;
+
+    /// &lt;summary&gt;
+    /// Gets a value indicating the state of the Toggle for the AuthZAuthN sub-menu.
+    /// &lt;/summary&gt;
+    public ref bool AuthZAuthNToggle
+    {
+        get
+        {
+            return ref _authZAuthNToggle;
+        }
+    }
+
+    /// &lt;summary&gt;
+    /// Gets a value indicating the state of the Toggle for the UIUX sub-menu.
+    /// &lt;/summary&gt;
+    public ref bool UIUXToggle
+    {
+        get
+        {
+            return ref _uIUXToggle;
+        }
+    }
+
+    /// &lt;summary&gt;
+    /// Gets the currentURL
+    /// &lt;/summary&gt;
+    public string CurrentURL { get; private set; } = string.Empty;
+
+    /// &lt;summary&gt;
+    /// Gets or sets a value indicating whether or not a menu item is focused, this is helpful when handling
+    /// events to determine if or when the sidenav should be minimized or hidden.
+    /// &lt;/summary&gt;
+    public bool IsFocusedOnMenuItem { get; set; } = false;
+
+    /// &lt;summary&gt;
+    /// Reverses the current value for the visibility of the sidebar and removes focus.
+    /// &lt;/summary&gt;
+    public void ToggleSideBar()
+    {
+        ShowSideBar = !ShowSideBar;
+        IsFocusedOnMenuItem = false;
+    }
+
+    /// &lt;summary&gt;
+    /// Reverses the state of the &lt;see cref="bool"/&gt; for the toggle.
+    /// &lt;/summary&gt;
+    /// &lt;param name="toggleItem"&gt;Reference of the toggle.&lt;/param&gt;
+    public void ToggleMenuItem(ref bool toggleItem)
+    {
+        toggleItem = !toggleItem;
+    }
+
+    /// &lt;summary&gt;
+    /// Handles loss of focus of the sidenav to handle dismissing it when appropriate.
+    /// &lt;/summary&gt;
+    public void SideBarFocusOutHandler()
+    {
+        if (!IsFocusedOnMenuItem)
+        {
+            ShowSideBar = false;
+        }
+
+        IsFocusedOnMenuItem = false;
+    }
+}
+    </CodeSnippetForSideBarContent>
+    <ContentBlockForSideBarContent>
+        For the remainder of the requirements we take a look at the DocumentationNavigationItems component. This component should
+        be broken down into smaller components for better maintainability which I may do in the future on this website and will 
+        definitely do on future projects. Here is a portion of the component to demonstrate how these things are accomplished.
+    </ContentBlockForSideBarContent>
+    <CodeSnippetForSideBarContent>
+&lt;li&gt;
+    //Again here I use a string to manage css to determine if the menu sub-category should be hidden, the logic is contained in the ViewModel
+    //AuthZAuthNToggle method. This satisfies requirement #6.
+    &#64;{
+        string toggleAuthZAuthN = VM!.AuthZAuthNToggle ? "" : "hidden";
+    }
+    &lt;button &#64;onclick="() =&gt; VM.ToggleMenuItem(ref VM.AuthZAuthNToggle)" type="button" class="flex items-center w-full p-2 text-white hover:bg-gray-700
+    transition duration-75 rounded-lg group dark:text-white dark:hover:bg-gray-700" aria-controls="dropdown-example" 
+    data-collapse-toggle="dropdown-example"&gt;
+        &lt;svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6"&gt;
+            &lt;path fill-rule="evenodd" d="M18.685 19.097A9.723 9.723 0 0021.75 12c0-5.385-4.365-9.75-9.75-9.75S2.25 6.615 2.25 12a9.723 9.723 0 003.065
+            7.097A9.716 9.716 0 0012 21.75a9.716 9.716 0 006.685-2.653zm-12.54-1.285A7.486 7.486 0 0112 15a7.486 7.486 0 015.855 2.812A8.224 8.224 0 0112 
+            20.25a8.224 8.224 0 01-5.855-2.438zM15.75 9a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z" clip-rule="evenodd" /&gt;
+         &lt;/svg&gt;
+        &lt;span class="flex-1 ml-3 text-left whitespace-nowrap" sidebar-toggle-item&gt;AuthZ/AuthN&lt;/span&gt;
+        &lt;svg sidebar-toggle-item class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"&gt;&lt;path fill-rule="evenodd"
+        d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" 
+        clip-rule="evenodd"&gt;&lt;/path&gt;&lt;/svg&gt;
+    &lt;/button&gt;
+    //using the toggleAuthZAuthN variable we add a value to the class of either "" or "hidden", this is to determine whether or not we should show the 
+    //sub menu items.
+    &lt;ul class="&#64;toggleAuthZAuthN py-2 space-y-2"&gt;
+        &lt;li&gt;
+            //Here is a sub menu link, with an onclick event that sets the ViewModel ShowSideBar to false, this satisfies requirement #4.
+            //Observe the _linkCss[AuthZAuthNRequireAuthenticationURI] coded into the class. _linkCss is a Dictionary that stores the optional CSS for each potential
+            //link, with the key being the endpoint. There is more on this in the next section.
+            &lt;a href="&#64;AuthZAuthNRequireAuthenticationURI" &#64;onclick="() =&gt; VM.ShowSideBar = false" class="&#64;_linkCss[AuthZAuthNRequireAuthenticationURI] 
+            flex items-center w-full p-2 text-white hover:bg-gray-700 transition duration-75 rounded-lg pl-11 group 
+            dark:text-white dark:hover:bg-gray-700"&gt;Require Authentication&lt;/a&gt;
+        &lt;/li&gt;
+    &lt;/ul&gt;
+&lt;/li&gt;
+    </CodeSnippetForSideBarContent>
+    <ContentBlockForSideBarContent>
+        To satisfy the last requirement "Sidebar must highlight the link currently visited." I need to show the code-behind for the DocumentationNavigationItems.
+        There are a couple methods in the code-behind that get the relevent endpoint text and sets the value of the CSS relevent to the particular link. Here it is.
+    </ContentBlockForSideBarContent>
+    <CodeSnippetForSideBarContent>
+/// &lt;summary&gt;
+/// Code behind for DocumentationNavigationItems.razor.
+/// &lt;/summary&gt;
+public partial class DocumentationNavigationItems : BasePage&lt;SideNavVM&gt;
+{
+    private string _currentURI = string.Empty;
+    private const string _bgColor = "bg-gray-700";
+    //This is a kvp storing the css value for each link, with they key being the endpoints value
+    //after the last / delimeter. This is explained in more depth below.
+    private readonly Dictionary&lt;string, string&gt; _linkCss = new();
+
+    /// &lt;summary&gt;
+    /// Gets or sets the &lt;see cref="NavigationManager"/&gt;.
+    /// &lt;/summary&gt;
+    [Parameter]
+    public NavigationManager? NavigationManager { get; set; }
+
+    /// &lt;summary&gt;
+    /// Gets or sets the Current URI the views in on.
+    /// &lt;/summary&gt;
+    [Parameter]
+    public string CurrentURI
+    {
+        get
+        {
+            return _currentURI;
+        }
+        set
+        {
+            _currentURI = value;
+            //Here I call SetLinkBGs, this sets the background css of all the links.
+            SetLinkBGs();
+        }
+    }
+
+    private static string GetCharsAfterLastInstanceOfDelimiter(string str, char delim)
+    {
+        if (!string.IsNullOrWhiteSpace(str))
+        {
+            int charLocation = str.LastIndexOf(delim);
+
+            return charLocation &gt; 0 ? str[charLocation..] : str;
+        }
+
+        return string.Empty;
+    }
+
+    private void SetLinkBGs()
+    {
+        //This gets the characters after the last delimiter which is /. An example URI would be something like "/Documentation/UXUI/JMDTSideBar".
+        //The function returns simply "JMDTSideBar" in this example.
+        string area = GetCharsAfterLastInstanceOfDelimiter(CurrentURI, '/');
+
+        //This iterates a hashset of endpoints that is stored in the WebConstants file. This hashset contains all of the final endpoint strings
+        //that will be used in a sidebar. 
+        foreach (string uri in DocumentationNavItems)
+        {
+            //We go through each item in the DocumentationNavItems setting the value for the _linkCss dictionary to either _bgColor value or
+            //to an empty string(which is default without hightlighting). If the current URI (which is the final value in the URI such as JMDTSideBar as
+            //shown above.)and checks if it is equal to the current _linkCss key, if so it sets the value to _bgColor, otherwise to an empty string.
+            _linkCss[uri] = CurrentURI.Equals(uri.TrimStart('/'), StringComparison.OrdinalIgnoreCase) ? _bgColor : string.Empty;
+        }
+
+        InvokeAsync(StateHasChanged);
+    }
+}
+    </CodeSnippetForSideBarContent>
+    <ContentBlockForSideBarContent>
+        Well, there you have it. This is a very rough overview of how I leveraged this template sidebar that is intended to be used by Javascript, into
+        a Blazor component. I will add the code-behind for the SideNav component as well because it configures an onchange event that is critical for 
+        all of this to work.
+    </ContentBlockForSideBarContent>
+    <CodeSnippetForSideBarContent>
+/// &lt;summary&gt;
+/// Codebehind for SideNav.razor.
+/// &lt;/summary&gt;
+public partial class SideNav : BasePage&lt;SideNavVM&gt;
+{
+    /// &lt;summary&gt;
+    /// Gets or sets the &lt;see cref="NavigationManager"/&gt;
+    /// &lt;/summary&gt;
+    [Inject]
+    NavigationManager? NavigationManager { get; set; }
+
+    /// &lt;inheritdoc/&gt;
+    protected override void OnInitialized()
+    {
+        if (NavigationManager is not null)
+        {
+            VM!.CurrentLocation = NavigationManager.ToBaseRelativePath(NavigationManager.Uri);
+            NavigationManager.LocationChanged += (o, e) =&gt;
+            {
+                VM!.CurrentLocation = NavigationManager.ToBaseRelativePath(NavigationManager.Uri);
+            };
+    }
+
+    base.OnInitialized();
+    }
+}
+    </CodeSnippetForSideBarContent>
+</BaseForSideBarContent>

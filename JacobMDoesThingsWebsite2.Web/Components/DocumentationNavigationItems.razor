@@ -1,0 +1,121 @@
+﻿@inherits NavigationItemsBase
+<div class="px-3 py-4 overflow-y-auto bg-gray-800 dark:bg-gray-800" style="height: calc(100% - 65px)">
+    <ul class="space-y-2 font-medium">
+        <li>
+            <a href="@DocumentationURI" @onclick="() => VM!.ShowSideBar = false" class="@LinkCss[DocumentationURI] flex items-center p-2 rounded-lg text-white hover:bg-gray-700">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6">
+                    <path d="M19.006 3.705a.75.75 0 00-.512-1.41L6 6.838V3a.75.75 0 00-.75-.75h-1.5A.75.75 0 003 3v4.93l-1.006.365a.75.75 0 00.512 1.41l16.5-6z" />
+                    <path fill-rule="evenodd" d="M3.019 11.115L18 5.667V9.09l4.006 1.456a.75.75 0 11-.512 1.41l-.494-.18v8.475h.75a.75.75 0 010 1.5H2.25a.75.75 0 010-1.5H3v-9.129l.019-.006zM18 20.25v-9.565l1.5.545v9.02H18zm-9-6a.75.75 0 00-.75.75v4.5c0 .414.336.75.75.75h3a.75.75 0 00.75-.75V15a.75.75 0 00-.75-.75H9z" clip-rule="evenodd" />
+                </svg>
+                <span class="ml-3">Documentation Home</span>
+            </a>
+        </li>
+        <li>
+            @{
+                string toggleAuthZAuthN = VM!.AuthZAuthNToggle ? "" : "hidden";
+            }
+            <button @onclick="() => VM.ToggleMenuItem(ref VM.AuthZAuthNToggle)" type="button" class="flex items-center w-full p-2 text-white hover:bg-gray-700 transition duration-75 rounded-lg group dark:text-white dark:hover:bg-gray-700" aria-controls="dropdown-example" data-collapse-toggle="dropdown-example">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6">
+                    <path fill-rule="evenodd" d="M18.685 19.097A9.723 9.723 0 0021.75 12c0-5.385-4.365-9.75-9.75-9.75S2.25 6.615 2.25 12a9.723 9.723 0 003.065 7.097A9.716 9.716 0 0012 21.75a9.716 9.716 0 006.685-2.653zm-12.54-1.285A7.486 7.486 0 0112 15a7.486 7.486 0 015.855 2.812A8.224 8.224 0 0112 20.25a8.224 8.224 0 01-5.855-2.438zM15.75 9a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z" clip-rule="evenodd" />
+                </svg>
+                <span class="flex-1 ml-3 text-left whitespace-nowrap" sidebar-toggle-item>AuthZ/AuthN</span>
+                <svg sidebar-toggle-item class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>
+            </button>
+            <ul class="@toggleAuthZAuthN py-2 space-y-2">
+                <li>
+                    <a href="@AuthZAuthNRequireAuthenticationURI" @onclick="() => VM.ShowSideBar = false" class="@LinkCss[AuthZAuthNRequireAuthenticationURI] flex items-center w-full p-2 text-white hover:bg-gray-700 transition duration-75 rounded-lg pl-11 group dark:text-white dark:hover:bg-gray-700">Require Authentication</a>
+                </li>
+                <li>
+                    <a href="@AuthZAuthNOptionAuthenticationWithIdentityURI" @onclick="() => VM!.ShowSideBar = false" class="@LinkCss[AuthZAuthNOptionAuthenticationWithIdentityURI] flex items-center w-full p-2 text-white hover:bg-gray-700 transition duration-75 rounded-lg pl-11 dark:text-white dark:hover:bg-gray-700">Opt. Auth w/ Identity</a>
+                </li>
+                <li>
+                    <a href="@AuthZAuthNConfigureAppCSURI" @onclick="() => VM!.ShowSideBar = false" class="@LinkCss[AuthZAuthNConfigureAppCSURI] flex items-center w-full p-2 text-white hover:bg-gray-700 transition duration-75 rounded-lg pl-11 dark:text-white dark:hover:bg-gray-700">Configure App.cs</a>
+                </li>
+                <li>
+                    <a href="@AuthZAuthNBlazorPageAndComponentAuthorizationURI" @onclick="() => VM!.ShowSideBar = false" class="@LinkCss[AuthZAuthNBlazorPageAndComponentAuthorizationURI] flex items-center w-full p-2 text-white hover:bg-gray-700 transition duration-75 rounded-lg pl-11 dark:text-white dark:hover:bg-gray-700">Secure Blazor Comp.</a>
+                </li>
+                <li>
+                    <a href="@AuthZAuthNPoliciesURI" @onclick="() => VM!.ShowSideBar = false" class="@LinkCss[AuthZAuthNPoliciesURI] flex items-center w-full p-2 text-white hover:bg-gray-700 transition duration-75 rounded-lg pl-11 dark:text-white dark:hover:bg-gray-700">Policy Authorization</a>
+                </li>
+            </ul>
+        </li>
+        <li>
+            @{
+                string toggleUIUX = VM!.UIUXToggle ? "" : "hidden";
+            }
+            <button @onclick="() => VM.ToggleMenuItem(ref VM.UIUXToggle)" type="button" class="flex items-center w-full p-2 text-white hover:bg-gray-700 transition duration-75 rounded-lg group dark:text-white dark:hover:bg-gray-700" aria-controls="dropdown-example" data-collapse-toggle="dropdown-example">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6">
+                    <path d="M10.5 18a.75.75 0 000 1.5h3a.75.75 0 000-1.5h-3z" />
+                    <path fillRule="evenodd" d="M7.125 1.5A3.375 3.375 0 003.75 4.875v14.25A3.375 3.375 0 007.125 22.5h9.75a3.375 3.375 0 003.375-3.375V4.875A3.375 3.375 0 0016.875 1.5h-9.75zM6 4.875c0-.621.504-1.125 1.125-1.125h9.75c.621 0 1.125.504 1.125 1.125v14.25c0 .621-.504 1.125-1.125 1.125h-9.75A1.125 1.125 0 016 19.125V4.875z" clipRule="evenodd" />
+
+                </svg>
+                <span class="flex-1 ml-3 text-left whitespace-nowrap" sidebar-toggle-item>UI/UX</span>
+                <svg sidebar-toggle-item class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>
+            </button>
+            <ul class="@toggleUIUX py-2 space-y-2">
+                <li>
+                    <a href="@UXUIJMDTSideBarURI" class="@LinkCss[UXUIJMDTSideBarURI] flex items-center w-full p-2 text-white hover:bg-gray-700 transition duration-75 rounded-lg pl-11 group dark:text-white dark:hover:bg-gray-700">JMDT Sidebar</a>
+                </li>
+                <li>
+                    <a href="@UXUIJMDTAppBarURI" class="@LinkCss[UXUIJMDTAppBarURI] flex items-center w-full p-2 text-white hover:bg-gray-700 transition duration-75 rounded-lg pl-11 group dark:text-white dark:hover:bg-gray-700">JMDT Appbar</a>
+                </li>
+                <li>
+                    <a href="@UXUIJMDTBaseVMBasePageURI" class="@LinkCss[UXUIJMDTBaseVMBasePageURI] flex items-center w-full p-2 text-white hover:bg-gray-700 transition duration-75 rounded-lg pl-11 group dark:text-white dark:hover:bg-gray-700">BaseVM and Page</a>
+                </li>
+            </ul>
+        </li>
+        <li>
+            @{
+                string toggleDataCollection = VM!.DataCollectionToggle ? "" : "hidden";
+            }
+            <button @onclick="() => VM.ToggleMenuItem(ref VM.DataCollectionToggle)" type="button" class="flex items-center w-full p-2 text-white hover:bg-gray-700 transition duration-75 rounded-lg group dark:text-white dark:hover:bg-gray-700" aria-controls="dropdown-example" data-collapse-toggle="dropdown-example">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5">
+                    <path fill-rule="evenodd" d="M8 1a.75.75 0 01.75.75V6h-1.5V1.75A.75.75 0 018 1zm-.75 5v3.296l-.943-1.048a.75.75 0 10-1.114 1.004l2.25 2.5a.75.75 0 001.114 0l2.25-2.5a.75.75 0 00-1.114-1.004L8.75 9.296V6h2A2.25 2.25 0 0113 8.25v4.5A2.25 2.25 0 0110.75 15h-5.5A2.25 2.25 0 013 12.75v-4.5A2.25 2.25 0 015.25 6h2zM7 16.75v-.25h3.75a3.75 3.75 0 003.75-3.75V10h.25A2.25 2.25 0 0117 12.25v4.5A2.25 2.25 0 0114.75 19h-5.5A2.25 2.25 0 017 16.75z" clip-rule="evenodd" />
+                </svg>
+
+                <span class="flex-1 ml-3 text-left whitespace-nowrap" sidebar-toggle-item>Data Collection</span>
+                <svg sidebar-toggle-item class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>
+            </button>
+            <ul class="@toggleDataCollection py-2 space-y-2">
+                <li>
+                    <a href="@DataCollectionConsentManagerURI" class="@LinkCss[DataCollectionConsentManagerURI] flex items-center w-full p-2 text-white hover:bg-gray-700 transition duration-75 rounded-lg pl-11 group dark:text-white dark:hover:bg-gray-700">Consent Manager</a>
+                </li>
+                <li>
+                    <a href="@DataCollectionConsentManagementUIURI" class="@LinkCss[DataCollectionConsentManagementUIURI] flex items-center w-full p-2 text-white hover:bg-gray-700 transition duration-75 rounded-lg pl-11 group dark:text-white dark:hover:bg-gray-700">Consent Management UI</a>
+                </li>
+                <li>
+                    <a href="@DataCollectionSessionUploadSchedulerServiceURI" class="@LinkCss[DataCollectionSessionUploadSchedulerServiceURI] flex items-center w-full p-2 text-white hover:bg-gray-700 transition duration-75 rounded-lg pl-11 group dark:text-white dark:hover:bg-gray-700">SessionUploadService</a>
+                </li>
+                <li>
+                    <a href="@DataCollectionDataCollectionServiceURI" class="@LinkCss[DataCollectionDataCollectionServiceURI] flex items-center w-full p-2 text-white hover:bg-gray-700 transition duration-75 rounded-lg pl-11 group dark:text-white dark:hover:bg-gray-700">DataCollectionService</a>
+                </li>
+            </ul>
+        </li>
+        <li>
+            @{
+                string toggleApiClient = VM!.ApiClientToggle ? "" : "hidden";
+            }
+            <button @onclick="() => VM.ToggleMenuItem(ref VM.ApiClientToggle)" type="button" class="flex items-center w-full p-2 text-white hover:bg-gray-700 transition duration-75 rounded-lg group dark:text-white dark:hover:bg-gray-700" aria-controls="dropdown-example" data-collapse-toggle="dropdown-example">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5">
+                    <path fill-rule="evenodd" d="M4.606 12.97a.75.75 0 01-.134 1.051 2.494 2.494 0 00-.93 2.437 2.494 2.494 0 002.437-.93.75.75 0 111.186.918 3.995 3.995 0 01-4.482 1.332.75.75 0 01-.461-.461 3.994 3.994 0 011.332-4.482.75.75 0 011.052.134z" clip-rule="evenodd" />
+                    <path fill-rule="evenodd" d="M5.752 12A13.07 13.07 0 008 14.248v4.002c0 .414.336.75.75.75a5 5 0 004.797-6.414 12.984 12.984 0 005.45-10.848.75.75 0 00-.735-.735 12.984 12.984 0 00-10.849 5.45A5 5 0 001 11.25c.001.414.337.75.751.75h4.002zM13 9a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd" />
+                </svg>
+
+                <span class="flex-1 ml-3 text-left whitespace-nowrap" sidebar-toggle-item>Api Caller</span>
+                <svg sidebar-toggle-item class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>
+            </button>
+            <ul class="@toggleApiClient py-2 space-y-2 ">
+                <li>
+                    <a href="@ApiClientOdataServiceCallerURI" class="@LinkCss[ApiClientOdataServiceCallerURI] flex items-center w-full p-2 text-white hover:bg-gray-700 transition duration-75 rounded-lg pl-11 group dark:text-white dark:hover:bg-gray-700">Service Caller</a>
+                </li>
+                <li>
+                    <a href="@ApiClientUserAuthorizationHandlerURI" class="@LinkCss[ApiClientUserAuthorizationHandlerURI] flex items-center w-full p-2 text-white hover:bg-gray-700 transition duration-75 rounded-lg pl-11 group dark:text-white dark:hover:bg-gray-700">User Authorization</a>
+                </li>
+                <li>
+                    <a href="@ApiClientServiceAuthorizationHandlerURI" class="@LinkCss[ApiClientServiceAuthorizationHandlerURI] flex items-center w-full p-2 text-white hover:bg-gray-700 transition duration-75 rounded-lg pl-11 group dark:text-white dark:hover:bg-gray-700">ServiceAuthorization</a>
+                </li>
+            </ul>
+        </li>
+    </ul>
+</div>
+

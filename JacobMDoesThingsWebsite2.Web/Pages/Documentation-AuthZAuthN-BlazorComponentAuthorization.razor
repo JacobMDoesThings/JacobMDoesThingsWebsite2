@@ -1,0 +1,66 @@
+﻿@attribute [Route(AuthZAuthNBlazorPageAndComponentAuthorizationURI)]
+
+<BaseForSideBarContent>
+    <HeaderForSideBarContent>
+        Securing Blazor Components
+    </HeaderForSideBarContent>
+    <ContentBlockForSideBarContent>
+        Once security has been configured, Blazor components may be secured in a few ways. Limitations depend on the type of component, for example, you may use the <b>[Authorize]</b>
+        attribute on a Blazor component only when it is a navigable component. This page contains a few approaches used to secure Blazor. Keep in mind that this is front-end
+        security and cannot be trusted, this is mainly for user experience. You must secure any sensitive information on the backend, such as when using an API.<br /><br />
+        The first example displays how to secure a routable Blazor component, routable referse to the components ability to be navigated to by using the &#64;page attribute.
+        You can simply install <b>&#64;attribute [Authorize]</b> at the top of the page to force all users to be logged in to view content. However, if you need to use roles or policies to
+        dictate who has access you must do either <b>&#64;attribute[Authorize(Policy = "PolicyName")]</b> or <b>&#64;attribute[Authorize(Roles = "RolesName")]</b>, you may use
+        a comma separated list as the string for multiple roles. <b>"RolesName1, RolesName2 ..."</b>. <br /><br />
+        More information provided by Microsoft's documentation can be found <a class="hover:underline brand-color" target="_blank" href="https://learn.microsoft.com/en-us/aspnet/core/blazor/security/?view=aspnetcore-7.0">here</a>
+    </ContentBlockForSideBarContent>
+    <CodeSnippetForSideBarContent>
+&#64;attribute[Authorize]
+&#64;attribute[Authorize(Policy = "PageViewingPolicy")]
+&#64;attribute[Authorize(Roles = "Admin, BasicUser")]
+    </CodeSnippetForSideBarContent>
+    <ContentBlockForSideBarContent>
+        Another approach is for securing portions of a page or non-navigable components using the AuthorizeView component. These components have optional child components Authorized 
+        and NotAuthorized that allow developers to dictate what is rendered to a user based on the user's authentication state. As with the Authorize attribute that can be used on a 
+        page, you have the option to use policies or roles.<br /><br />
+        There are two primary approaches to using AuthorizeView: The first option, you can use the AuthorizeView without child components, this will allow authorized users to have access to the
+        content in the control but does not provide an alternative to unauthorized users; The second option, gives us an opportunity to display content to unauthorized users as well.
+        Please keep in mind that these controls can be bypassed and any sensitive information must be further secured, these measure are simply for user experience.
+    </ContentBlockForSideBarContent>
+    <CodeSnippetForSideBarContent>
+//Authorized only option with Policy example.
+&lt;AuthorizeView&gt; Policy="AuthorizedPolicy"&gt;
+    Hey, you are authorized to use the authorized only button &lt;button class="btn btn-primary"&gt;Authorized Only Button&lt;/button&gt;
+&lt;/AuthorizeView&gt;
+
+//Authorized with option for Unauthorized.
+&lt;AuthorizeView&gt;
+    &lt;Authorized&gt;
+        Hey, you are authorized to use the authorized only button &lt;button class="btn btn-primary"&gt;Authorized Only Button&lt;/button&gt;
+    &lt;/&lt;Authorized&gt;
+    &lt;NotAuthorized&gt;
+        You are unauthorized to view the button, click &lt;a href="/requestaccess"&gt;here&lt;/a&gt; to request access.
+    &lt;/&lt;NotAuthorized&gt;
+&lt;/&lt;AuthorizeView&gt;
+    </CodeSnippetForSideBarContent>
+    <ContentBlockForSideBarContent>
+        Some honorable mentions here for more detailed scenarios. AuthorizeViews may be nested, this can be useful for more detailed configurations. For example, you can create an
+        AuthorizeView that allows all authorized users but inside the AuthorizeView have another that only allows for Admins. Another neat feature is you may also use an
+        Authorizing child component inside an AuthorizeView, this will only be displayed while authentication is in progress. Here is an example of a nested AuthorizeView.
+    </ContentBlockForSideBarContent>
+    <CodeSnippetForSideBarContent>
+//Nested AuthorizeView
+&lt;AuthorizeView Policy="AuthenticatedUserPolicy"&gt;
+    &lt;Authorized&gt;
+        &lt;AuthorizeView Policy="AdminPolicy"&gt;
+            &lt;Authorized&gt;
+                Congrats! You satisfy both the AuthenticatedUserPolicy &amp; AdminPolicy!
+            &lt;/Authorized&gt;
+            &lt;NotAuthorized&gt;
+                You satisfy the AuthenticatedUserPolicy; however, you fail to meet the AdminPolicy requirements!
+            &lt;/NotAuthorized&gt;
+        &lt;/AuthorizeView&gt;
+    &lt;/Authorized&gt;
+&lt;/AuthorizeView&gt;
+    </CodeSnippetForSideBarContent>
+</BaseForSideBarContent>

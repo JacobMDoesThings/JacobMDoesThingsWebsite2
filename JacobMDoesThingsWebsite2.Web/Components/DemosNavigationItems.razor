@@ -1,0 +1,33 @@
+﻿@inherits NavigationItemsBase
+
+<div class="h-full px-3 py-4 overflow-y-auto bg-gray-800 dark:bg-gray-800">
+    <ul class="space-y-2 font-medium">
+        <li>
+            <a href="@DemosURI" @onclick="() => VM!.ShowSideBar = false" class="@LinkCss[DemosURI] flex items-center p-2 rounded-lg text-white hover:bg-gray-700">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6">
+                    <path d="M19.006 3.705a.75.75 0 00-.512-1.41L6 6.838V3a.75.75 0 00-.75-.75h-1.5A.75.75 0 003 3v4.93l-1.006.365a.75.75 0 00.512 1.41l16.5-6z" />
+                    <path fill-rule="evenodd" d="M3.019 11.115L18 5.667V9.09l4.006 1.456a.75.75 0 11-.512 1.41l-.494-.18v8.475h.75a.75.75 0 010 1.5H2.25a.75.75 0 010-1.5H3v-9.129l.019-.006zM18 20.25v-9.565l1.5.545v9.02H18zm-9-6a.75.75 0 00-.75.75v4.5c0 .414.336.75.75.75h3a.75.75 0 00.75-.75V15a.75.75 0 00-.75-.75H9z" clip-rule="evenodd" />
+                </svg>
+                <span class="ml-3">Demos Home</span>
+            </a>
+        </li>
+        <li>
+            @{
+                string toggleSiteDemos = VM!.SiteDemosToggle ? "" : "hidden";
+            }
+            <button @onclick="() => VM.ToggleMenuItem(ref VM.SiteDemosToggle)" type="button" class="flex items-center w-full p-2 text-white hover:bg-gray-700 transition duration-75 rounded-lg group dark:text-white dark:hover:bg-gray-700" aria-controls="dropdown-example" data-collapse-toggle="dropdown-example">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5">
+                    <path fill-rule="evenodd" d="M8.5 3.528v4.644c0 .729-.29 1.428-.805 1.944l-1.217 1.216a8.75 8.75 0 013.55.621l.502.201a7.25 7.25 0 004.178.365l-2.403-2.403a2.75 2.75 0 01-.805-1.944V3.528a40.205 40.205 0 00-3 0zm4.5.084l.19.015a.75.75 0 10.12-1.495 41.364 41.364 0 00-6.62 0 .75.75 0 00.12 1.495L7 3.612v4.56c0 .331-.132.649-.366.883L2.6 13.09c-1.496 1.496-.817 4.15 1.403 4.475C5.961 17.852 7.963 18 10 18s4.039-.148 5.997-.436c2.22-.325 2.9-2.979 1.403-4.475l-4.034-4.034A1.25 1.25 0 0113 8.172v-4.56z" clip-rule="evenodd" />
+                </svg>
+
+                <span class="flex-1 ml-3 text-left whitespace-nowrap" sidebar-toggle-item>Site Demos</span>
+                <svg sidebar-toggle-item class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>
+            </button>
+            <ul class="@toggleSiteDemos py-2 space-y-2 transition duration-75">
+                <li>
+                    <a href="@SiteDemoDataCollectionURI" @onclick="() => VM.ShowSideBar = false" class="@LinkCss[SiteDemoDataCollectionURI] flex items-center w-full p-2 text-white hover:bg-gray-700 transition duration-75 rounded-lg pl-11 group dark:text-white dark:hover:bg-gray-700">Data Collection</a>
+                </li>
+            </ul>
+        </li>
+    </ul>
+</div>

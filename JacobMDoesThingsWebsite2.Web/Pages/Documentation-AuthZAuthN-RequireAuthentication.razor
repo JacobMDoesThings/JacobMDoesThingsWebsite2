@@ -1,0 +1,39 @@
+﻿@attribute [Route(AuthZAuthNRequireAuthenticationURI)]
+
+<BaseForSideBarContent>
+    <HeaderForSideBarContent>
+        Require Authentication
+    </HeaderForSideBarContent>
+    <ContentBlockForSideBarContent>
+        I will start with describing how to configure tokens so that they can be used in the future to call other apis such like GraphAPI as show in the example.
+        The next code snippet describes how to configure authorization globally to pages.
+    </ContentBlockForSideBarContent>
+    <CodeSnippetForSideBarContent>
+services.AddMicrosoftIdentityWebAppAuthentication(configuration, nameof(settings.AzureAdB2C))
+    .EnableTokenAcquisitionToCallDownstreamApi()
+    .AddDownstreamWebApi(nameof(settings.DownstreamAPI), configuration.GetSection(nameof(settings.DownstreamAPI)))
+    .AddMicrosoftGraph(configuration.GetSection(nameof(settings.GraphApi)))
+    .AddInMemoryTokenCaches();
+    </CodeSnippetForSideBarContent>
+    <CodeSnippetForSideBarContent>
+services.AddControllersWithViews(options =>
+{
+    var policy = new AuthorizationPolicyBuilder()
+    .RequireAuthenticatedUser()
+    .Build();
+    options.Filters.Add(new AuthorizeFilter(policy));
+}).AddMicrosoftIdentityUI();
+    </CodeSnippetForSideBarContent>
+    <ContentBlockForSideBarContent>
+        In Program.cs I put the following code.
+    </ContentBlockForSideBarContent>
+    <CodeSnippetForSideBarContent>
+app.UseCookiePolicy();
+app.UseRouting();
+app.UseAuthentication();
+app.UseAuthorization();
+    </CodeSnippetForSideBarContent>
+    <ContentBlockForSideBarContent>
+        Blazor authorization also requires changes to the App.razor file, an example can be found <a class="hover:underline brand-color" href="@AuthZAuthNConfigureAppCSURI">here.</a>
+    </ContentBlockForSideBarContent>
+</BaseForSideBarContent>

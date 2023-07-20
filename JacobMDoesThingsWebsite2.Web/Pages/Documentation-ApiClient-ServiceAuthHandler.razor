@@ -1,0 +1,167 @@
+﻿@attribute [Route(ApiClientServiceAuthorizationHandlerURI)]
+
+<BaseForSideBarContent>
+    <HeaderForSideBarContent>
+        Service Based Authentication for Azure B2C Application.
+    </HeaderForSideBarContent>
+    <ContentBlockForSideBarContent>
+        Implementing a solution that would allow me to get access to an access token
+        with Microsoft's libraries proved to be challenging. I ran into a few hurdles
+        trying to figure this out, it seems that application permissions/scopes was an
+        after thought and isn't quite fully supported natively.
+        <br/><br/>
+        The first problem I came accross is when configuring my application registration to
+        allow my application to leverage roles instead of scopes for granting permissions to my Api.
+        This is doable, just not in the UI, at least at the time of writing this. Instead, we need 
+        to modify the <b>Manifest</b> in the <b>AppRegistration</b>. Here is an example of what this
+        looks like.
+    </ContentBlockForSideBarContent>
+    <CodeSnippetForSideBarContent>
+// Note origin needs to be set to "Application" and roles added as required.
+"appRoles": [
+    {
+        "allowedMemberTypes": [
+            "Application"
+        ],
+        "description": "Ability to read to application data.",
+        "displayName": "&ltThe display name such as application.read or application reader&gt;",
+        "id": "&lt;a unique guid value&gt;",
+        "isEnabled": true,
+        "lang": null,
+        "origin": "Application", 
+        "value": "&lt;the value like application.read"
+    }
+]
+// Also, you must ensure that the accessTokenAcceptedVersion is set to 2.
+"accessTokenAcceptedVersion": 2,
+
+    </CodeSnippetForSideBarContent>
+    <ContentBlockForSideBarContent>
+        The next issue took me a while to figure out. At first I tried using <b>ITokenAcquisition</b> like I did for 
+        <a class="hover:underline brand-color" href="@ApiClientUserAuthorizationHandlerURI" target="_blank">user authorization.</a>
+        The issue is that for this to work <b>GetAccessTokenForAppAsync</b> requires that a Tenant Id is provided, except when 
+        providing the Tenant Id an exception is thrown stating that you can only use Tenant Id for Azure AD tenants. I unfortunately
+        chased a few red herrings, one of which is <b>DownstreamApi</b> which allows you to call Apis differently. <b>DownstreamApi</b> appears
+        to use <b>ITokenAcquisition</b> as well and ends up having the same problem.
+        <br /><br />
+        I did some testing and I found out that I was definitely able to retrieve an access token from my authorization endpoint when providing
+        the correct credentials and it seemed like there wasn't a built-in library to handle this for me so I threw together a service for 
+        maintaining tokens for service calls. The service is completely experimental and I can't say for certain how reliable it will be in production
+        but, I don't foresee any major issues even with this being a injected as a singleton and not using memorycache. I will let you know if anything
+        goes wrong. &#128513;
+        <br /><br />
+        Here is the class in it's entirety.
+    </ContentBlockForSideBarContent>
+    <CodeSnippetForSideBarContent>
+public class ServiceAuthorizationHandler : DelegatingHandler
+{
+    private readonly B2CClient _b2cClient;
+    private readonly string _grantType;
+    private readonly HttpClient _httpClient;
+    private readonly Dictionary&lt;string, string&gt; _headerValues;
+    private readonly string _uri;
+    private readonly ILogger _logger;
+    private KeyValuePair&lt;string, string&gt; _tokenAndExpireValue = new();
+
+    public ServiceAuthorizationHandler(HttpClient client, B2CClient b2cClient,
+        ILogger&lt;ServiceAuthorizationHandler&gt; logger, string grantType = "client_credentials")
+    {
+        if (b2cClient.ClientId is null ||
+        b2cClient.ClientSecret is null ||
+        b2cClient.ClientScopes is null)
+        {
+            throw new ArgumentException(nameof(B2CClient));
+        }
+
+        _b2cClient = b2cClient;
+        _grantType = grantType;
+        _httpClient = client;
+
+        _headerValues = new Dictionary&lt;string, string&gt; {
+        { "client_id", _b2cClient.ClientId },
+        { "client_secret", _b2cClient.ClientSecret },
+        { "scope", _b2cClient.ClientScopes },
+        { "grant_type", _grantType },
+        };
+
+        _httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+        _uri = $"{b2cClient.Instance}/{b2cClient.Domain}/{b2cClient.SignUpSignInPolicyId}/oauth2/v2.0/token";
+    }
+    
+    protected override async Task&lt;HttpResponseMessage&gt; SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+    {
+        if (string.IsNullOrEmpty(_tokenAndExpireValue.Key) ||
+        HasExpired(_tokenAndExpireValue.Value))
+        {
+            var result = await _httpClient.PostAsync(_uri, new FormUrlEncodedContent(_headerValues), cancellationToken);
+
+            if (result.IsSuccessStatusCode)
+            {
+                var content = await result.Content.ReadAsStringAsync();
+                SetTokenInformation(content, ref _tokenAndExpireValue);
+            }
+            else
+            {
+                _logger.LogError("Problem retrieving access token {StatusCode} {ReasonPhrase}"
+                , result.StatusCode.ToString(), result.ReasonPhrase);
+            }
+        }
+
+        request.Headers.Add("Authorization", "Bearer " + _tokenAndExpireValue.Key);
+        return await base.SendAsync(request, cancellationToken);
+    }
+
+    private static string? DeserializeToken(string jsonString, string tokenName)
+    {
+        var value = JsonSerializer.Deserialize&lt;JsonNode&gt;(jsonString);
+
+        if (value is not null)
+        {
+            var tokenValue = value[tokenName];
+            var returnVal = tokenValue?.GetValue&lt;dynamic&gt;();
+
+            return Convert.ToString(returnVal);
+        }
+
+        return string.Empty;
+    }
+
+    private static bool HasExpired(string expiresOnTokenValue)
+    {
+        if (string.IsNullOrEmpty(expiresOnTokenValue))
+        {
+            return true;
+        }
+
+        var tokenValidTime = DateTimeOffset.FromUnixTimeSeconds(int.Parse(expiresOnTokenValue)).UtcDateTime;
+        var now = DateTimeOffset.UtcNow;
+        var timeLeft = tokenValidTime - now;
+
+        return timeLeft &lt; TimeSpan.FromMinutes(10);
+    }
+
+    private static void SetTokenInformation(string content, ref KeyValuePair&lt;string, string&gt; tokenKeyExpirationValueRef)
+    {
+        string? token = DeserializeToken(content, "access_token");
+        string? expiration = DeserializeToken(content, "expires_on");
+
+        tokenKeyExpirationValueRef = new KeyValuePair&lt;string, string&gt;(token ?? string.Empty, expiration ?? string.Empty);
+    }
+}
+    </CodeSnippetForSideBarContent>
+    <ContentBlockForSideBarContent>
+        First, let me point out that this is a <b>DelegatingHandler</b> for intercepting calls for a <b>HttpClient</b>,
+        more information on how this is used is 
+        <a class="hover:underline brand-color" href="@ApiClientUserAuthorizationHandlerURI" target="_blank">here</a>. Now, we
+        can go over the SendMessageAsync method that is provided by the <b>DelegatingHandler</b> parent class. Here we check
+        if we have a valid authorization header ready and if not we post to our authorization endpoint asking for a token with
+        provided credentials and apply the result to variables for storage. After we the token check we add the token we have
+        to the passed in <b>HttpRequest</b> and send the request to our calling <b>HttpClient</b>.
+        <br/><br/>
+        Other than this the rest of the class is for gathering information from configuration, validation and parsing.
+        Here is an example of how to use this in the Program.cs file.
+    </ContentBlockForSideBarContent>
+    <CodeSnippetForSideBarContent>
+services.AddHttpClient&lt;IServiceODataServiceCaller, ServiceOdataServiceCaller&gt;().AddHttpMessageHandler&lt;ServiceAuthorizationHandler&gt;();
+    </CodeSnippetForSideBarContent>
+</BaseForSideBarContent>

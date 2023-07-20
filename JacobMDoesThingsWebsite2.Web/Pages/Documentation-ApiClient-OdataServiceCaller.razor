@@ -1,0 +1,75 @@
+﻿@attribute [Route(ApiClientOdataServiceCallerURI)]
+
+<BaseForSideBarContent>
+    <HeaderForSideBarContent>
+        OData Service Caller.
+    </HeaderForSideBarContent>
+    <ContentBlockForSideBarContent>
+        This site uses <a class="hover:underline brand-color" href="http://OData.org" target="OData">OData</a> endpoints for 
+        the API. I need to create a client that would call the <b>OData</b> controllers and provide <b>OData</b> queries when
+        required. Asp.NET Core provides an ODataController that can be decorated with [EnableQuery] or allow Linq to be used
+        as query parameters. I opted to use <b>OData</b> queries because I think it can be more flexible, however there may come
+        a time when I need to construct large queries, and this may cause problems with this approach. This example shows a POST
+        and GET method used to create a SessionInformation item and Get SessionInformation items with an optional query.
+        <br /><br />
+        Here is the service.
+    </ContentBlockForSideBarContent>
+    <CodeSnippetForSideBarContent>
+public class ServiceOdataServiceCaller : IServiceODataServiceCaller
+{
+    public readonly HttpClient _httpClient = new();
+    public readonly OdataServiceCallerOptions _options;
+
+    /// &lt;summary&gt;
+    /// Initializes the SessionFunctionsCaller.
+    /// &lt;/summary&gt;
+    /// &lt;param name="client"&gt;The &lt;see cref="HttpClient"/&gt; responsible for the odata calls.&lt;/param&gt;
+    /// &lt;param name="options"&gt;The &lt;see cref="OdataServiceCallerOptions"/&gt; options.&lt;/param&gt;
+    public ServiceOdataServiceCaller(HttpClient httpClient, OdataServiceCallerOptions options)
+    {
+        _httpClient = httpClient;
+        _options = options;
+        _httpClient.BaseAddress = options.BaseURI;
+    }
+
+    ///&lt;inheritdoc/&gt;
+    public async Task&lt;ODataResponse&lt;SessionInformationDTO&gt;&gt; GetSessionInformationAsync(string query = "")
+    {
+        var result = await _httpClient.GetAsync($"{_options.SessionInformation}{query}");
+        ODataResponse&lt;SessionInformationDTO&gt;? returnVal;
+
+        if (!result.IsSuccessStatusCode)
+        {
+            throw new HttpRequestException($"Unsuccessful status code returned {result.StatusCode} : {result.ReasonPhrase}");
+        }
+        else
+        {
+            returnVal = await result.ParseOdataResponse&lt;SessionInformationDTO&gt;();
+        }
+
+        return returnVal ?? new ODataResponse&lt;SessionInformationDTO&gt;();
+    }
+
+    ///&lt;inheritdoc/&gt;
+    public async Task&lt;SessionInformationDTO?&gt; PostSessionInformationAsync(SessionInformationDTO value)
+    {
+        var content = value.CreateHTTPContent();
+        var result = (await _httpClient.PostAsync(_options.SessionInformation, content));
+
+        if (!result.IsSuccessStatusCode)
+        {
+            throw new HttpRequestException($"Unsuccessful status code returned {result.StatusCode} : {result.ReasonPhrase}");
+        }
+
+        return await result.Content.ReadFromJsonAsync&lt;SessionInformationDTO&gt;();
+    }
+}
+    </CodeSnippetForSideBarContent>
+    <ContentBlockForSideBarContent>
+        Just a basic service caller with the exception of the GetSessionInformationAsync having an TODO - ODataResponse object
+        that contains the content returned which is parsed with the TODO ParseOdatResponse extension method. An I created the TODO -
+        ODataResponse so that when the controller returns a collection with the count of all the possible documents in a query, I 
+        will have access to that number. I did this because I wanted to use <b>OData</b> queries to manage paging and this is
+        useful information to have for components like grids.
+    </ContentBlockForSideBarContent>
+</BaseForSideBarContent>

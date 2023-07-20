@@ -1,0 +1,87 @@
+﻿
+@*https://flowbite.com/docs/components/modal/*@
+@{
+    if (IsVisible)
+    {
+        <!-- Main modal -->
+        <div id="staticModal" data-modal-backdrop="static" tabindex="-1" aria-hidden="true" class="fixed flex justify-center items-center z-50 w-full p-4 overflow-x-hidden overflow-y-auto md:inset-0 h-[calc(100%-1rem)] max-h-full">
+            <div class="relative w-full max-w-2xl max-h-full ">
+                <!-- Modal content -->
+                <div class="relative bg-gray-200 rounded-lg brand-color border-2 border-brand shadow">
+                    <!-- Modal header -->
+                    <div class="flex items-start justify-between p-4 border-b rounded-t dark:border-gray-600">
+                        <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
+                            Data and Privacy
+                        </h3>
+                    </div>
+                    <!-- Modal body -->
+                    <div class="p-6 space-y-6">
+                        <p class="text-base leading-relaxed text-gray-700 dark:text-gray-400">
+                            <b>Strictly Necessary Data Collection and Storage</b><br />
+                            This website uses cookies (which stores data on your computer) and collects data for required site
+                            functionality and diagnostic purposes. Other data collected includes, but is not limited to pagevists
+                            and page interaction (which is stored on external entities). By continuing to use this website you consent to both the collection of diagnostic data, necessary cookies and to allow
+                            JacobMDoesThings.com and it's owner to use this data.
+
+                        </p>
+                        <label class="relative inline-flex items-center mb-5 cursor-pointer">
+                            <input type="checkbox" value="" class="sr-only peer" disabled="disabled" checked="checked">
+                            <div class="w-11 h-6 bg-gray-200 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
+                            <span class="ml-3 text-sm font-medium text-gray-500 dark:text-gray-500">Strictly Necessary</span>
+                        </label>
+ 
+                        <p class="text-base leading-relaxed text-gray-700 dark:text-gray-400">
+                            <b>Optional Consent</b><br />
+                            Aside from necessary data collection, JacobMDoesThings may also store cookies (which stores data on your computer) to help identify returning users and preferences.
+                            These cookies do not contain any personal information and can not be used to identify the user. The cookie is not required for general functionality.
+                        </p>
+                        <label class="relative inline-flex items-center cursor-pointer" @onclick="ToggleOptionalConsent">
+                            <input type="checkbox" @bind-value="Consent" class="sr-only peer" checked="@Consent">
+                            <div class="w-11 h-6 bg-gray-200 rounded-full peer peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 bg-gray-700
+                            peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white
+                            after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
+                            <span class="ml-3 text-sm font-medium text-gray-900 dark:text-gray-300">Optional Consent</span>
+                        </label>
+                    </div>
+                    <!-- Modal footer -->
+                    <div class="flex items-center p-6 space-x-2 border-t border-brand rounded-b dark:border-gray-600">
+                        <button  class="text-gray-800 brand-color bg-gray-900 hover:bg-gray-600 focus:ring-4 focus:outline-none focus:ring-blue-300
+                            rounded-lg border border-gray-200 text-sm font-medium px-5 py-2.5 hover:text-gray-900 focus:z-10 " @onclick="Update">
+                            Update
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+}
+
+@code {
+    /// <summary>
+    /// Gets or sets a value indicating whether or not consent has been given.
+    /// </summary>
+    [Parameter]
+    public bool Consent { get; set; }
+
+    /// <summary>
+    /// Gets or sets the <see cref="EventCallback"/> for updating privacy preferences.
+    /// </summary>
+    [Parameter]
+    public EventCallback<bool> UpdateCallback { get; set; }
+
+    /// <summary>
+    /// Gets or sets a value indicating whether this dialog should be visible or not.
+    /// </summary>
+    [Parameter]
+    public bool IsVisible { get; set; }
+
+    private void ToggleOptionalConsent()
+    {
+        Consent = !Consent;
+    }
+
+    private async Task Update()
+    {
+        await UpdateCallback.InvokeAsync(Consent);
+    }
+}

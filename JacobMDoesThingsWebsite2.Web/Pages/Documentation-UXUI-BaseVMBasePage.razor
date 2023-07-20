@@ -1,0 +1,51 @@
+﻿@attribute [Route(UXUIJMDTBaseVMBasePageURI)]
+<BaseForSideBarContent>
+    <HeaderForSideBarContent>
+        Base ViewModel and BasePage{T}
+    </HeaderForSideBarContent>
+    <ContentBlockForSideBarContent>
+        This is added for reference purposes. Here is the BasePage{T}.
+    </ContentBlockForSideBarContent>
+    <CodeSnippetForSideBarContent>
+/// &lt;summary&gt;
+/// Base class for pages bound to a viewmodel.
+/// &lt;/summary&gt;
+/// &lt;typeparam name="T"&gt;View model type.&lt;/typeparam&gt;
+public class BasePage&lt;T&gt; : ComponentBase
+    where T : INotifyPropertyChanged
+{
+    /// &lt;summary&gt;
+    /// Gets or sets refrence to the viewmodel.
+    /// &lt;/summary&gt;
+    [Inject]
+    protected T? VM { get; set; }
+
+    /// &lt;inheritdoc/&gt;
+    protected override void OnInitialized()
+    {
+        if (VM is not null)
+        {
+            VM.PropertyChanged += (s, e) =&gt; InvokeAsync(StateHasChanged);
+        }
+    }
+}
+    </CodeSnippetForSideBarContent>
+    <ContentBlockForSideBarContent>
+        Here is the BaseViewModel.
+    </ContentBlockForSideBarContent>
+    <CodeSnippetForSideBarContent>
+/// &lt;summary&gt;
+/// Base viewmodel.
+/// &lt;/summary&gt;
+public abstract class BaseViewModel : INotifyPropertyChanged
+{
+    /// &lt;inheritdoc/&gt;
+    public event PropertyChangedEventHandler? PropertyChanged;
+
+    /// &lt;summary&gt;
+    /// PropertyChanged event to notify UI of changes.
+    /// &lt;/summary&gt;
+    protected virtual void OnPropertyChanged() =&gt; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(null));
+}
+    </CodeSnippetForSideBarContent>
+</BaseForSideBarContent>

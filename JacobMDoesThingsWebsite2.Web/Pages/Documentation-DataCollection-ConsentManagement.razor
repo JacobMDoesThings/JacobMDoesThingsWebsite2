@@ -1,0 +1,168 @@
+﻿@attribute [Route(DataCollectionConsentManagerURI)]
+
+<BaseForSideBarContent>
+    <HeaderForSideBarContent>
+        Consent Manager Service Information.
+    </HeaderForSideBarContent>
+    <ContentBlockForSideBarContent>
+        I want to start off by stating that I am not a lawyer and that I am not well informed on privacy laws and requirements. That
+        being said I believe that this service does a fair job of managing minimal data collection and storing privacy preferences
+        in a way that shelters the UI development from unnecessary control.
+        <br /> <br />
+        The consent management implementation contract is defined by an interface (IConsentServiceManager). This interface defines
+        the functionality required to provide the UI with tools to manage consent preferences. Methods are used instead of properties 
+        to provide encapsulation for the implementation. This site uses <b>ProtectedLocalStorage</b> to store preferences. For this reason
+        I created a class that is has a <b>ProtectedLocalStorage</b> dependent implementation that implements the IConsentServiceManager interface.
+        <br /><br />
+        This isn't a feature-rich interface and only allows for a single option for consent but it serves this website well and can be used in 
+        the future as a template or direction for more robust solutions.
+        <br /><br />
+        The UI usage of this service can be found <a class="hover:underline brand-color" href="@DataCollectionConsentManagementUIURI" target="_blank">here.</a>
+        <br />
+        Here is the interface...
+    </ContentBlockForSideBarContent>
+    <CodeSnippetForSideBarContent>
+/// &lt;summary&gt;
+/// Interface for managin user consent on data collection.
+/// &lt;/summary&gt;
+public interface IConsentServiceManager : INotifyPropertyChanged
+{
+    /// &lt;summary&gt;
+    /// Gets a bool indicating whether or not data collection consent has been requested.
+    /// &lt;/summary&gt;
+    /// &lt;returns&gt;A bool indicating whether or not consent has been requested.&lt;/returns&gt;
+    public Task&lt;bool&gt; GetConsentHasBeenRequestedAsync();
+
+    /// &lt;summary&gt;
+    /// Sets the value indicating whether or not consent has been requested to true.
+    /// &lt;/summary&gt;
+    /// &lt;returns&gt;A &lt;see cref="Task"/&gt; representing the completion status of the task.&lt;/returns&gt;
+    public Task SetConsentHasBeenRequestedAsync();
+
+    /// &lt;summary&gt;
+    /// Sets a value indicating whether or not data collection consent has been given.
+    /// &lt;/summary&gt;
+    /// &lt;param name="value"&gt;The value indicating given consent.&lt;/param&gt;
+    /// &lt;returns&gt;A &lt;see cref="Task"/&gt; representing the completion status of the task.&lt;/returns&gt;
+    public Task SetConsentHasBeenGivenAsync(bool value);
+
+    /// &lt;summary&gt;
+    /// Gets the unique session Id associated with a user's browsesr storage and long running sessions
+    /// to track usage across multiple visits.
+    /// &lt;/summary&gt;
+    /// &lt;returns&gt;A &lt;see cref="string" /&gt; value representing the user's session id.&lt;/returns&gt;
+    public Task&lt;string&gt; GetSessionIdAsync();
+
+    /// &lt;summary&gt;
+    /// Sets the session Id of the user to an empty string.
+    /// &lt;/summary&gt;
+    /// &lt;returns&gt;A &lt;see cref="Task"/&gt; representing the completion status of the task.&lt;/returns&gt;
+    public Task ClearSessionIdAsync();
+}
+    </CodeSnippetForSideBarContent>
+    <ContentBlockForSideBarContent>
+        This class encapsulates the logic for the consent management, and the UI is only explicitely required to provide values 
+        to the service of the current state of the given consent. I did this to prevent issues with various components 
+        attempting to maintain the state itself through the service causing difficulties in stability and maintainability.
+        <br /><br />
+        Notice the IConsentServiceManager implements <b>INotifyPropertyChanged</b>, this is because when the storage requires async
+        methods to get and set values. In a situation where async functionality is not acceptable I provided an option to allow 
+        for notification of changes to the underlying <b>ProtectedLocalStorage</b>. I use the LocalStorageService in a <b>CircuitHandler</b>
+        class that queues an upload of collected data periodically. This queue is set to fire when a user's connection is closed. The 
+        issue I had is that attempting to get data from the <b>ProtectedLocalStorage</b> during the OnConnectionDown event would hang and
+        eventually cancel the task. Now, when changes are made to certain properties I can have the <b>Circuithandler</b> record the values,
+        preventing the call to the <b>ProtectedLocalStorage</b>.
+        <br /><br />
+        Here is the LocalStorageService...
+    </ContentBlockForSideBarContent>
+    <CodeSnippetForSideBarContent>
+/// &lt;summary&gt;
+/// The service responsible for managing &lt;see cref="ProtectedBrowserStorage"/&gt;
+/// &lt;/summary&gt;
+public class LocalStorageService : IConsentServiceManager
+{
+    private readonly ProtectedLocalStorage _protectedLocalStorage;
+    private readonly string _consentHasBeenRequestedKey = "ConsentHasBeenRequested";
+    private readonly string _consentHasBeenGivenKey = "ConsentHasBeenGiven";
+    private readonly string _sessionIdKey = "SessionId";
+
+    public event PropertyChangedEventHandler? PropertyChanged;
+
+    /// &lt;summary&gt;
+    /// Initializes LocalStorageService.
+    /// &lt;/summary&gt;
+    /// &lt;param name="localStorage"&gt;&lt;/param&gt;
+    /// &lt;param name="navigationManager"&gt;&lt;/param&gt;
+    public LocalStorageService(ProtectedLocalStorage localStorage)
+    {
+        _protectedLocalStorage = localStorage;
+    }
+
+    ///&lt;inheritdoc/&gt;
+    public async Task&lt;bool&gt; GetConsentHasBeenRequestedAsync()
+    {
+        return (await _protectedLocalStorage.GetAsync&lt;bool&gt;(_consentHasBeenRequestedKey)).Value;
+    }
+
+    ///&lt;inheritdoc/&gt;
+    public async Task SetConsentHasBeenRequestedAsync()
+    {
+        await _protectedLocalStorage.SetAsync(_consentHasBeenRequestedKey, true);
+        NotifyPropertyChanged(_consentHasBeenRequestedKey);
+    }
+
+    ///&lt;inheritdoc/&gt;
+    public async Task SetConsentHasBeenGivenAsync(bool value)
+    {
+        var sessionId = (await _protectedLocalStorage.GetAsync&lt;string&gt;(_sessionIdKey)).Value;
+
+        if (value)
+        {
+            if (string.IsNullOrEmpty(sessionId))
+            {
+                await SetSessionIdAsync();
+            }
+        }
+        else
+        {
+            await ClearSessionIdAsync();
+        }
+
+        await _protectedLocalStorage.SetAsync(_consentHasBeenGivenKey, value);
+        NotifyPropertyChanged(_consentHasBeenGivenKey);
+    }
+
+    ///&lt;inheritdoc/&gt;
+    public async Task&lt;string&gt; GetSessionIdAsync()
+    {
+        var value = (await _protectedLocalStorage.GetAsync&lt;string&gt;(_sessionIdKey)).Value;
+        return value ??= string.Empty;
+    }
+
+    ///&lt;inheritdoc/&gt;
+    public async Task ClearSessionIdAsync()
+    {
+        await _protectedLocalStorage.SetAsync(_sessionIdKey, string.Empty);
+        NotifyPropertyChanged(nameof(GetSessionIdAsync));
+    }
+
+    ///&lt;inheritdoc/&gt;
+    private async Task SetSessionIdAsync()
+    {
+        await _protectedLocalStorage.SetAsync(_sessionIdKey, Guid.NewGuid());
+        NotifyPropertyChanged(nameof(GetSessionIdAsync));
+    }
+
+    private void NotifyPropertyChanged([CallerMemberName] string propertyName = "")
+    {
+        if (PropertyChanged is not null)
+        {
+            PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
+        }
+    }
+}
+    </CodeSnippetForSideBarContent>
+    <ContentBlockForSideBarContent>
+        There you have it. This is how I manage consent preferences with the <b>ProtectedLocalStorage</b>.
+    </ContentBlockForSideBarContent>
+</BaseForSideBarContent>

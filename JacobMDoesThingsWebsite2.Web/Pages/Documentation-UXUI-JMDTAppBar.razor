@@ -1,0 +1,123 @@
+﻿@attribute [Route(UXUIJMDTAppBarURI)]
+
+<BaseForSideBarContent>
+    <HeaderForSideBarContent>
+        Appbar documentation for JacobMDoesthings.com
+    </HeaderForSideBarContent>
+    <ContentBlockForSideBarContent>
+        The appbar is mainly derived from <a class="hover:underline brand-color" target="_blank" href="https://tailwindui.com/components/application-ui/navigation/navbars">TailwindUI.com</a>
+        I made a few changes to meet my needs and because I am not using Javascript I needed to wire up my own logic. <br /><br />
+        The Appbar is the bar across the top of every page consisting of a logo, links, notification bell and login component.
+        The purpose of this component is to give users easy access to major portions of the site, provide easy to see alerts,
+        manage login and to help establish branding. The focus of the documentation will be on the logic not on the styling.<br /><br />
+        There are few minimum criteria for this component to be complete and they are as follows:
+        <ol style="list-style:decimal; list-style-position:inside; font-style:italic; font-weight:lighter">
+            <li>
+                All top-level links must be fully visible at all times or a toggle button should be available, no overlapping content!
+            </li>
+            <li>
+                Basic logo, notification bell and login component should be displayed on all screen sizes.
+            </li>
+            <li>
+                Current top-level location must be highlighted to signify location.
+            </li>
+            <li>
+                On smaller screen sizes a button must appear that allows users to toggle a menu showing all top level locations, current
+                location must be highlighted.
+            </li>
+            <li>
+                When a user is logged in it must display users initials (up to 2) and provide a popup to allow logout when clicked.
+            </li>
+            <li>
+                Navigation toggle menu, notification bell popup and logout popup should all be hidden when focus is lost.
+            </li>
+        </ol>
+        <br />
+        For how css and such is handled for this component look a the <a class="hover:underline brand-color" target="_blank" href="@UXUIJMDTSideBarURI">Sidebar documentation.</a>
+        This documentation displays how I work with screen sizes, toggle button and location highlighting. This documentation will cover the extension method for 
+        parsing UsersInitials, the full source will be posted on github when it is made available.
+        <br /><br />
+        Here is the extension method to parse a user's initials.
+    </ContentBlockForSideBarContent>
+    <CodeSnippetForSideBarContent>
+/// &lt;summary&gt;
+/// Returns user's initials from the <see cref="AuthenticationState" /> ranging from 1 to n (default 2 max).
+/// &lt;/summary&gt;
+/// &lt;param name="authState"&gt;The &lt;see cref="AuthenticationState"/&gt;.&lt;/param&gt;
+/// &lt;param name="length"&gt;
+/// The desired length of initials such as: 1 = j, 2 = jm, 3 = jmd ... default is 2. Max length is 5.
+/// &lt;/param&gt;
+/// &lt;param name="delimiters"&gt;The array of delimiters for suggesting next part of name such as space or ,.&lt;/param&gt;
+/// &lt;returns&gt;a&lt;see cref="string"/&gt;value of the first two initials specified by the dilimeters.&lt;/returns&gt;
+public static string UserInitials(this AuthenticationState authState, int length = 2, char[]? delimiters = null)
+{
+    // First, I check to ensure that if delimiters is not null that the length does not exceed 5
+    // and throw an exception if it does.
+    if (delimiters?.Length > 5)
+    {
+        throw new ArgumentException($"{nameof(delimiters)} length must be 5 or less.");
+    }
+
+    // Here we get the user's identity from the authstate param and setup a return value.
+    var identity = authState.User.Identity;
+    var returnVal = string.Empty;
+
+    // Lets make sure that everything is valid and if so parse the initials.
+    if (identity is not null && identity.IsAuthenticated)
+    {
+        returnVal = GetInitialsFromName(identity.Name, length, delimiters);
+    }
+
+    // Returns an empty string when in invalid state, otherwise the user's initials.
+    return returnVal;
+}
+
+private static string GetInitialsFromName(string? name, int length, char[]? delimiters = null)
+{
+    // If the user doesn't have a name the initials will be an empty string so I return that here.
+    if (string.IsNullOrEmpty(name))
+    {
+        return string.Empty;
+    }
+
+    // If the delimiters null we create a default empty space as a delimiter.
+    delimiters ??= new char[] { ' ' };
+    
+    // Convert the string to a ReadOnlySpan for performance.
+    ReadOnlySpan&lt;char&gt; nameSpan = name;
+
+    // Create a span to store the initials. Max 2.
+    Span&lt;char&gt; returnVal = new char[2];
+
+    // The first character should be the first initial.
+    returnVal[0] = name.ElementAt(0);
+
+    // Iterate the user's name, and check each character to see if it is a delimiter.
+    int lengthCount = 0;
+
+    for (int i = 0; i &lt; nameSpan.Length; i++)
+    {
+        // Stop the loop when we have enough initials to satisfy length.
+        if (length - 1 == lengthCount)
+        {
+            break;
+        }
+
+        // Check for a delimiter, if so then add to the returnVal span the next char as an initial as long
+        // as it is not a delimiter character.
+        foreach (char t in delimiters)
+        {
+            if (t == nameSpan[i] && !(delimiters.Contains(nameSpan[i + 1])))
+            {
+                lengthCount++;
+                returnVal[lengthCount] = nameSpan[nameSpan.IndexOf(nameSpan[i]) + 1];
+                break;
+            }
+        }
+    }
+
+    // return the initials string.
+    return returnVal.ToString().Trim();
+}
+    </CodeSnippetForSideBarContent>
+</BaseForSideBarContent>

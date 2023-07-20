@@ -1,0 +1,20 @@
+﻿@inject SideNavVM VM
+
+<div class="p-4 md:ml-64" @onclick="() => VM.ShowSideBar = false">
+    <div class="p-4 bg-dark">
+        @{
+            if (ChildContent is not null)
+            {
+                @ChildContent;    
+            }
+        }
+    </div>
+</div>
+
+@code{
+    /// <summary>
+    /// Gets or sets the sole <see cref="RenderFragment"/>.
+    /// </summary>
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+}

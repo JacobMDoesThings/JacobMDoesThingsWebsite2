@@ -1,0 +1,18 @@
+﻿<div class="flex items-center justify-center h-48 mb-4 rounded bg-gray-50 border-2 border-brand h-full">
+    <p class="p-3 text-lg text-gray-800">
+        @{
+            if (ChildContent is not null)
+            {
+                @ChildContent;
+            }
+        }
+    </p>
+</div>
+
+@code {
+    /// <summary>
+    /// Gets or sets the sole <see cref="RenderFragment"/>.
+    /// </summary>
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+}
