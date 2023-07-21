@@ -66,8 +66,8 @@ public class ServiceOdataServiceCaller : IServiceODataServiceCaller
 }
     </CodeSnippetForSideBarContent>
     <ContentBlockForSideBarContent>
-        Just a basic service caller with the exception of the GetSessionInformationAsync having an TODO - ODataResponse object
-        that contains the content returned which is parsed with the TODO ParseOdatResponse extension method. An I created the TODO -
+        Just a basic service caller with the exception of the GetSessionInformationAsync having an ODataResponse object
+        that contains the content returned which is parsed with the ParseOdatResponse extension method. I created the
         ODataResponse so that when the controller returns a collection with the count of all the possible documents in a query, I 
         will have access to that number. I did this because I wanted to use <b>OData</b> queries to manage paging and this is
         useful information to have for components like grids.
