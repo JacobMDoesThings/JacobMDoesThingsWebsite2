@@ -111,14 +111,12 @@ internal static class CompositionRoot
         AppSettings settings = new()
         {
             OdataServiceCallerOptions = configurationRoot.GetRequiredSection(nameof(OdataServiceCallerOptions)).Get<OdataServiceCallerOptions>(),
-            StartUploadSessionsServiceOptions = configurationRoot.GetRequiredSection(nameof(StartUploadSessionsServiceOptions)).Get<StartUploadSessionsServiceOptions>(),
             CosmosRepositoryOptions = configurationRoot.GetRequiredSection(nameof(CosmosDBOptions)).Get<CosmosDBOptions>(),
             JacobMDoesThingsWebsite2ContextOptions = configurationRoot.GetRequiredSection(nameof(JacobMDoesThingsWebsite2ContextOptions)).Get<JacobMDoesThingsWebsite2ContextOptions>(),
             B2CClient = configurationRoot.GetRequiredSection(nameof(B2CClient)).Get<B2CClient>()
         };
 
         _ = settings.OdataServiceCallerOptions ?? throw new NullReferenceException(nameof(settings.OdataServiceCallerOptions));
-        _ = settings.StartUploadSessionsServiceOptions ?? throw new NullReferenceException(nameof(settings.StartUploadSessionsServiceOptions));
         _ = settings.CosmosRepositoryOptions ?? throw new NullReferenceException(nameof(settings.CosmosRepositoryOptions));
         _ = settings.B2CClient ?? throw new NullReferenceException(nameof(settings.B2CClient));
         _ = settings.JacobMDoesThingsWebsite2ContextOptions ?? throw new NullReferenceException(nameof(settings.JacobMDoesThingsWebsite2ContextOptions));
@@ -126,7 +124,6 @@ internal static class CompositionRoot
         services
             .AddCosmosClient(settings.CosmosRepositoryOptions)
             .AddSingleton(settings.B2CClient)
-            .AddSingleton(settings.StartUploadSessionsServiceOptions)
             .AddSingleton(settings.OdataServiceCallerOptions)
             .AddSingleton(settings.JacobMDoesThingsWebsite2ContextOptions);
 

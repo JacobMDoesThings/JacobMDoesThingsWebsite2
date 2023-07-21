@@ -11,11 +11,6 @@ internal class AppSettings
     public OdataServiceCallerOptions? OdataServiceCallerOptions { get; set; }
 
     /// <summary>
-    /// Gets or sets the <see cref="StartUploadSessionsServiceOptions"/>.
-    /// </summary>
-    public StartUploadSessionsServiceOptions? StartUploadSessionsServiceOptions { get; set; }
-
-    /// <summary>
     /// Gets or sets the <see cref="CosmosRepositoryOptions"/>
     /// </summary>
     public CosmosDBOptions? CosmosRepositoryOptions { get; set; }
