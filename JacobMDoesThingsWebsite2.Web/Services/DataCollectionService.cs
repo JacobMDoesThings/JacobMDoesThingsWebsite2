@@ -52,7 +52,7 @@ public class DataCollectionService : CircuitHandler
 
     // Information found here https://stackoverflow.com/questions/61345537/detect-client-closing-connection-blazor
     ///<inheritdoc/>
-    public override async Task OnCircuitClosedAsync(Circuit circuit,
+    public override async Task OnConnectionDownAsync(Circuit circuit,
         CancellationToken cancellationToken)
     {
         if (_sessionInformation.PageVisits.Count > 0)
@@ -62,7 +62,7 @@ public class DataCollectionService : CircuitHandler
 
         _sessionUploadSchedulerService.AddSessionInformationTask(_uniqueUserTrackingId ?? string.Empty, _sessionInformation);
 
-        await base.OnCircuitClosedAsync(circuit, cancellationToken);
+        await base.OnConnectionDownAsync(circuit, cancellationToken);
     }
 
     ///<inheritdoc/>
