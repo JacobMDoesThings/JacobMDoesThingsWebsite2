@@ -19,6 +19,12 @@
         href="@DataCollectionConsentManagerURI" target="_blank">IConsentServiceManager</a> <b>OnPropertyChange</b> event for the
         user's "sessionid" (The id stored in <b>ProtectedLocalStorage</b> to track returning users).
         <br /><br />
+        <b>
+            *** This feature no longer uses SessionUploadSchedulerService, instead it calls <a class="hover:underline brand-color"
+             href="@ApiClientOdataServiceCallerURI" target="_blank">OdataServiceCaller</a> directly. ***
+        </b>
+        <br/>
+        <br/>
 
         The following code section is a simple demonstration on the connection up and circuit down events.
     </ContentBlockForSideBarContent>
@@ -75,7 +81,7 @@ protected void NavigationManagerLocationChangeHandler(object? sender, EventArgs 
         <br/><br />
         This was solved by having the <a class="hover:underline brand-color"
         href="@DataCollectionConsentManagerURI" target="_blank">IConsentServiceManager</a> implement the <b>INotifyPropertyChanged</b> interface. Now I can extend the
-        PropertyChanged event and update local variables accordingly. Here is what this looks like.
+        PropertyChanged event and update local variables accordingly. Here is what this looks like.<br/><br/>
     </ContentBlockForSideBarContent>
     <CodeSnippetForSideBarContent>
 private async void OnSessionIdChangedAsync(object? sender, PropertyChangedEventArgs args)
