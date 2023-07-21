@@ -17,8 +17,7 @@ internal static class CompositionRoot
             .ConfigureClientTokenAcquisition()
             .AddOdataClient()
             .AddScoped<IConsentServiceManager, LocalStorageService>()
-            .AddScoped<CircuitHandler, DataCollectionService>()
-            .AddSingleton<ISessionUploadSchedulerService<SessionInformationDTO>, SessionUploadSchedulerService>()
+            .AddScoped<CircuitHandler, DataCollectionService>()        
             .ConfigureSecurity(configuration);
         services.AddRazorPages();
         services.AddServerSideBlazor().AddMicrosoftIdentityConsentHandler();

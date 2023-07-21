@@ -1,4 +1,6 @@
-﻿namespace JacobMDoesThingsWebsite2.Web.Services;
+﻿using JacobMDoesThingsWebsite2.Web.Models;
+
+namespace JacobMDoesThingsWebsite2.Web.Services;
 
 /// <summary>
 /// Service for collection user data such as interaction and user agent.
@@ -8,9 +10,9 @@ public class DataCollectionService : CircuitHandler
     private readonly IJSRuntime _runtime;
     private readonly string _uniqueUserTrackingId = Guid.NewGuid().ToString();
     private readonly NavigationManager _navigationManager;
-    private readonly ISessionUploadSchedulerService<SessionInformationDTO> _sessionUploadSchedulerService;
     private readonly SessionInformationDTO _sessionInformation = new();
     private readonly IConsentServiceManager _localStorageService;
+    private readonly IServiceODataServiceCaller _service;
 
     /// <summary>
     /// Initializer for the DataCollectionService"/>
@@ -18,13 +20,13 @@ public class DataCollectionService : CircuitHandler
     /// <param name="navigationManager">The <see cref="NavigationManager"/> for Blazor navigation.</param>
     /// <param name="scheduler">The service for managing collected data <see cref="ISessionUploadSchedulerService{T}"/></param>
     /// <param name="localStorageService">Consent manager for dictating allowable collected data <see cref="IConsentServiceManager"/></param>
-    public DataCollectionService(NavigationManager navigationManager, ISessionUploadSchedulerService<SessionInformationDTO> scheduler,
-        IConsentServiceManager localStorageService, IJSRuntime jSRuntime)
+    public DataCollectionService(NavigationManager navigationManager, IConsentServiceManager localStorageService, 
+        IJSRuntime jSRuntime, IServiceODataServiceCaller service)
     {
+        _service = service;
         _runtime = jSRuntime;
         _navigationManager = navigationManager;
         _navigationManager.LocationChanged += NavigationManagerLocationChangeHandler;
-        _sessionUploadSchedulerService = scheduler;
         _localStorageService = localStorageService;
         _localStorageService.PropertyChanged += OnSessionIdChangedAsync;
         _sessionInformation.PageVisits.Add(new PageVisitDTO()
@@ -52,17 +54,17 @@ public class DataCollectionService : CircuitHandler
 
     // Information found here https://stackoverflow.com/questions/61345537/detect-client-closing-connection-blazor
     ///<inheritdoc/>
-    public override async Task OnConnectionDownAsync(Circuit circuit,
+    public override async Task OnCircuitClosedAsync(Circuit circuit,
         CancellationToken cancellationToken)
     {
         if (_sessionInformation.PageVisits.Count > 0)
         {
             _sessionInformation.PageVisits.Last().EndTime = DateTimeOffset.Now;
         }
+       
+        await _service.PostSessionInformationAsync(_sessionInformation);
 
-        _sessionUploadSchedulerService.AddSessionInformationTask(_uniqueUserTrackingId ?? string.Empty, _sessionInformation);
-
-        await base.OnConnectionDownAsync(circuit, cancellationToken);
+        await base.OnCircuitClosedAsync(circuit, cancellationToken);
     }
 
     ///<inheritdoc/>
