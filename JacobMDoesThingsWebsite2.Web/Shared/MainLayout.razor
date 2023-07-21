@@ -21,7 +21,8 @@
     ///<inheritdoc />
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if (!(await LocalStorageService.GetConsentHasBeenRequestedAsync()))
+        if (!(await LocalStorageService.GetConsentHasBeenRequestedAsync()) &&
+            _showPrivacyDialog == false)
         {
             _showPrivacyDialog = true;
             await InvokeAsync(StateHasChanged);

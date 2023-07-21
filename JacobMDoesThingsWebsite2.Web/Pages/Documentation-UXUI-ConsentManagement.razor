@@ -16,7 +16,11 @@
         This is the code behind for the dialog popup that is used on this site...
     </ContentBlockForSideBarContent>
     <CodeSnippetForSideBarContent>
-private bool _consent = true;
+/// &lt;summary&gt;
+/// Gets or sets a value indicating whether or not consent has been given.
+/// &lt;summary&gt;
+[Parameter]
+public bool Consent { get; set; }
 
 /// &lt;summary&gt;
 /// Gets or sets the &lt;see cref="EventCallback"/&gt; for updating privacy preferences.
@@ -32,7 +36,7 @@ public bool IsVisible { get; set; }
 
 private void ToggleOptionalConsent()
 {
-    _consent = !_consent;
+    Consent = !Consent;
 }
 
 private async Task Update()
@@ -64,7 +68,8 @@ private async Task Update()
     <CodeSnippetForSideBarContent>
 &#64;inject IConsentServiceManager LocalStorageService;
 
-&lt;PrivacyDialog IsVisible="_showPrivacyDialog" UpdateCallback="(bool value) =&gt; UpdatePrivacyEvent(value)" /&gt;
+&lt;PrivacyDialog IsVisible="_showPrivacyDialog" UpdateCallback="(bool value) =&gt; UpdatePrivacyEvent(value)"
+        Consent="_consentHasBeenGiven"/&gt;
 
 &#64;code {
     private bool _showPrivacyDialog = false;
@@ -72,7 +77,8 @@ private async Task Update()
     ///&lt;inheritdoc /&gt;
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if (!(await LocalStorageService.GetConsentHasBeenRequestedAsync()))
+        if (!(await LocalStorageService.GetConsentHasBeenRequestedAsync()) &&
+            _showPrivacyDialog == false)
         {
             _showPrivacyDialog = true;
             await InvokeAsync(StateHasChanged);
