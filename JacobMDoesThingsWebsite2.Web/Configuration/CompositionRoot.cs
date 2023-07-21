@@ -14,7 +14,7 @@ internal static class CompositionRoot
         services
             .AddScoped<SideNavVM>()
             .ConfigureAppSettings(configuration)
-            .AddSingleton<ServiceAuthorizationHandler>()
+            .ConfigureClientTokenAcquisition()
             .AddOdataClient()
             .AddScoped<IConsentServiceManager, LocalStorageService>()
             .AddScoped<CircuitHandler, DataCollectionService>()
@@ -22,7 +22,20 @@ internal static class CompositionRoot
             .ConfigureSecurity(configuration);
         services.AddRazorPages();
         services.AddServerSideBlazor().AddMicrosoftIdentityConsentHandler();
-        services.AddHttpClient<IServiceODataServiceCaller, ServiceOdataServiceCaller>().AddHttpMessageHandler<ServiceAuthorizationHandler>();
+
+        return services;
+    }
+
+    /// <summary>
+    /// Configure token acquisition for b2c client_credentials flow.
+    /// </summary>
+    /// <param name="services">The ServiceCollection.</param>
+    /// <returns><see cref="ServiceCollection"/> with configured services.</returns>
+    private static IServiceCollection ConfigureClientTokenAcquisition(this IServiceCollection services)
+    {
+        services.AddSingleton<ServiceTokenAcquirer>()
+            .AddTransient<ServiceAuthorizationHandler>()
+            .AddHttpClient<IServiceODataServiceCaller, ServiceOdataServiceCaller>().AddHttpMessageHandler<ServiceAuthorizationHandler>();
         return services;
     }
 
