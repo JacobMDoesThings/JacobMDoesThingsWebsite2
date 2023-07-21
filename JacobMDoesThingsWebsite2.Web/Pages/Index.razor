@@ -1,3 +1,82 @@
 ﻿@page "/"
+@inject NavigationManager NavigationManager;
+<div class="h-full max-w-4xl mx-auto">
+    <WelcomeBanner />
+    @*<div class="w-full pt-2">
+    <div class="flex items-center justify-center mb-4 mx-auto rounded  h-full max-w-4xl">
+    <p class="p-3 text-lg ">
+    Welcome! This site is dedicated to providing documentation and demonstrations of various Microsoft technologies
+    like Blazor, Cosmos, .Net and Azure. JacobMDoesThings.com's mission is to provide a place to help me keep a log of
+    what I have done and how I have done it as well as demonstrations when possible, in the hopes that I and
+    hopefully others can benefit from it in the future.
+    </p>
+    </div>
+    </div>*@
 
-<WelcomeBanner />
+    <section class="bg-gray-800 mt-5 mb-3 rounded border border-brand">
+        <div class="py-8 px-4 mx-auto max-w-screen-xl text-center lg:py-16">
+            <h1 class="mb-4 text-4xl font-extrabold tracking-tight leading-none md:text-5xl lg:text-6xl text-white">A source for solutions</h1>
+            <p class="mb-8 text-lg font-normal text-gray-500 lg:text-xl sm:px-16 lg:px-48 text-gray-300">
+                Here at JacobMDoesThings I provide solutions to problems by primarily utilizing Microsoft technologies like Blazor, Cosmos, .Net and Azure.
+                My goal is to enable clients and other developers to reach their goals through system design solutions, education, documentation and other
+                tasks when I am able.
+            </p>
+            <div class="flex flex-col space-y-4 sm:flex-row sm:justify-center sm:space-y-0 sm:space-x-4">
+                <button @onclick="() => NavigationManager.NavigateTo(DocumentationURI, false)" class="inline-flex justify-center items-center py-3 px-5 text-base font-medium text-center text-white rounded-lg bg-blue-700 hover:bg-blue-800 focus:ring-4  focus:ring-blue-900">
+                    Documentation
+                    <svg class="w-3.5 h-3.5 ml-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 10">
+                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M1 5h12m0 0L9 1m4 4L9 9" />
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </section>
+    <section class="bg-gray-800 mt-5 mb-3 rounded border border-brand">
+        <div class="py-8 px-4 mx-auto max-w-screen-xl text-center lg:py-16">
+            <h1 class="mb-4 text-4xl font-extrabold tracking-tight leading-none md:text-5xl lg:text-6xl text-white">Security-minded hosting on Azure</h1>
+            <p class="mb-8 text-lg font-normal text-gray-500 lg:text-xl sm:px-16 lg:px-48 text-gray-300">
+                This site is hosted on Azure using various resources including appservices, keyvaults, Cosmos, and an AzureADB2C tenant.
+                The purpose of the tenant is to allow the website client to communicate with api endpoints securely using identity tokens 
+                provided by the client's credentials. B2C is also being leveraged to bring the option to provide both secure and personalized
+                services to users that sign up here. To further protect the services, the secrets are stored securely on Azure and accessed by 
+                way of managed identities to further protect the api and database.
+            </p>
+            <div class="flex flex-col space-y-4 sm:flex-row sm:justify-center sm:space-y-0 sm:space-x-4">
+                <a href="https://azure.microsoft.com/en-us" target="_blank" class="inline-flex justify-center items-center py-3 px-5 text-base font-medium text-center text-white rounded-lg bg-blue-700 hover:bg-blue-800 focus:ring-4  focus:ring-blue-900">
+                    Azure Info
+                    <svg class="w-3.5 h-3.5 ml-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 10">
+                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M1 5h12m0 0L9 1m4 4L9 9" />
+                    </svg>
+                </a>
+            </div>
+        </div>
+    </section>
+    <section class="bg-gray-800 mt-5 mb-3 rounded border border-brand">
+        <div class="py-8 px-4 mx-auto max-w-screen-xl text-center lg:py-16">
+            <h1 class="mb-4 text-4xl font-extrabold tracking-tight leading-none md:text-5xl lg:text-6xl text-white">Flexible and scalable</h1>
+            <p class="mb-8 text-lg font-normal text-gray-500 lg:text-xl sm:px-16 lg:px-48 text-gray-300">
+               While developing this application, my intention is to enable it to easily add scalable features. To make it easily extendable I developed
+               services and endpoints using techniques, libraries and frameworks that are simple to extend and are decoupled from the implementation when
+               necessary. 
+            </p>
+        </div>
+    </section>
+    <section class="bg-gray-800 mt-5 mb-3 rounded border border-brand">
+        <div class="py-8 px-4 mx-auto max-w-screen-xl text-center lg:py-16">
+            <h1 class="mb-4 text-4xl font-extrabold tracking-tight leading-none md:text-5xl lg:text-6xl text-white">Demonstrations</h1>
+            <p class="mb-8 text-lg font-normal text-gray-500 lg:text-xl sm:px-16 lg:px-48 text-gray-300">
+                I have added and will continue to add demonstrations of features as they are added to the site. Starting off, simply creating
+                an account and loggin in will demonstrate the Azure B2C integration. I will continue to add features and demos when I have the time.
+            </p>
+            <div class="flex flex-col space-y-4 sm:flex-row sm:justify-center sm:space-y-0 sm:space-x-4">
+                <button @onclick="() => NavigationManager.NavigateTo(DemosURI, false)" class="inline-flex justify-center items-center py-3 px-5 text-base font-medium text-center text-white rounded-lg bg-blue-700 hover:bg-blue-800 focus:ring-4  focus:ring-blue-900">
+                    Demonstrations
+                    <svg class="w-3.5 h-3.5 ml-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 10">
+                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M1 5h12m0 0L9 1m4 4L9 9" />
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </section>
+
+</div>

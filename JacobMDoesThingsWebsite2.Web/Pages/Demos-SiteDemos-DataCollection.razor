@@ -5,7 +5,11 @@
         This is a simple app to show the data collected from this site.
     </HeaderForSideBarContent>
     <ContentBlockForSideBarContent>
+        This grid calls an OData Api through a <a class="hover:underline brand-color" href="@ApiClientOdataServiceCallerURI">ODataServiceCaller</a>.
+        The Api is protected requiring the application to make the call. OData is useful here because the grid comes with the ability
+        to auto-generate OData query strings for sorting and filtering. OData also allows for pagination so each page is a separate query.
+    </ContentBlockForSideBarContent>
+    <ContentBlockForSideBarContent>
         <SessionInformationDataGrid />
     </ContentBlockForSideBarContent>
 </BaseForSideBarContent>
-
