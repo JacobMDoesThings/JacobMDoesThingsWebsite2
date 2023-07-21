@@ -1,0 +1,87 @@
+[
+  {
+    "name": "AllowedHosts",
+    "value": "*",
+    "slotSetting": false
+  },
+  {
+    "name": "B2CClient__CallbackPath",
+    "value": "/signin-oidc",
+    "slotSetting": false
+  },
+  {
+    "name": "B2CClient__ClientId",
+    "value": "5afdc559-b74d-48f1-8c26-2832642c82ae",
+    "slotSetting": false
+  },
+  {
+    "name": "B2CClient__ClientScopes",
+    "value": "https://jacobmdoesthingsB2C.onmicrosoft.com/5afdc559-b74d-48f1-8c26-2832642c82ae/.default",
+    "slotSetting": false
+  },
+  {
+    "name": "B2CClient__Domain",
+    "value": "jacobmdoesthingsB2C.onmicrosoft.com",
+    "slotSetting": false
+  },
+  {
+    "name": "B2CClient__Instance",
+    "value": "https://jacobmdoesthingsB2C.b2clogin.com",
+    "slotSetting": false
+  },
+  {
+    "name": "B2CClient__SignUpSignInPolicyId",
+    "value": "b2c_1_SignupSignin",
+    "slotSetting": false
+  },
+  {
+    "name": "B2CClient__UserScopes__0",
+    "value": "https://jacobmdoesthingsB2C.onmicrosoft.com/5afdc559-b74d-48f1-8c26-2832642c82ae/User.Authorized",
+    "slotSetting": false
+  },
+  {
+    "name": "CosmosDBOptions__DatabaseName",
+    "value": "SessionInfo",
+    "slotSetting": false
+  },
+  {
+    "name": "CosmosDBOptions__EndPoint",
+    "value": "https://jmfreecosmosdb.documents.azure.com:443/",
+    "slotSetting": false
+  },
+  {
+    "name": "JacobMDoesThingsWebsite2ContextOptions__SessionInformationContainerName",
+    "value": "sessioninformation-dev",
+    "slotSetting": false
+  },
+  {
+    "name": "Logging__LogLevel__Default",
+    "value": "Information",
+    "slotSetting": false
+  },
+  {
+    "name": "Logging__LogLevel__Microsoft.AspNetCore",
+    "value": "Warning",
+    "slotSetting": false
+  },
+  {
+    "name": "OdataServiceCallerOptions__BaseURI",
+    "value": "https://localhost:7122/odata/v1/",
+    "slotSetting": false
+  },
+  {
+    "name": "OdataServiceCallerOptions__SessionInformation",
+    "value": "SessionInformation",
+    "slotSetting": false
+  },
+  {
+    "name": "StartUploadSessionsServiceOptions__DueTime",
+    "value": "30000",
+    "slotSetting": false
+  },
+  {
+    "name": "StartUploadSessionsServiceOptions__IntervalTime",
+    "value": "30000",
+    "slotSetting": false
+  }
+]
