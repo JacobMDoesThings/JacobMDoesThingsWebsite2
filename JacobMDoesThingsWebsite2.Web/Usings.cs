@@ -34,6 +34,7 @@ global using JacobMDoesThingsWebsite2.Repo.Entities;
 global using JacobMDoesThingsWebsite2.Web.Configuration;
 global using JacobMDoesThingsWebsite2.Web.Components;
 global using JacobMDoesThingsWebsite2.Web.Models.AutoMapperConfigurations;
+global using JacobMDoesThingsWebsite2.Web.Controllers;
 global using static JacobMDoesThingsWebsite2.Web.WebConstants;
 global using AutoMapper;
 global using JacobMDoesThingsWebsite2.Repo.Configuration;
