@@ -98,7 +98,7 @@ public abstract class BaseController : ODataController
         }
         catch (ArgumentNullException)
         {
-            return NotFound();
+            return BadRequest();
         }
         catch (Exception ex)
         {

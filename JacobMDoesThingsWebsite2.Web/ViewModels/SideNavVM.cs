@@ -10,6 +10,7 @@ public class SideNavVM : BaseViewModel
     private bool _uIUXToggle;
     private bool _dataCollectionToggle;
     private bool _apiClientToggle;
+    private bool _oDataApiToggle;
     private string _currentLocation = string.Empty;
     private bool _showSideBar = false;
 
@@ -130,6 +131,17 @@ public class SideNavVM : BaseViewModel
         get 
         {
             return ref _apiClientToggle;
+        }
+    }
+
+    /// <summary>
+    /// Gets a value indicating the state of the Toggle for the ODataApi sub-menu.
+    /// </summary>
+    public ref bool ODataApiToggle
+    {
+        get
+        {
+            return ref _oDataApiToggle;
         }
     }
 

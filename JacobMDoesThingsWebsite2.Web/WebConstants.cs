@@ -13,6 +13,7 @@ public static class WebConstants
     private const string _siteDemoBase = "/SiteDemos";
     private const string _dataCollectionBase = "/DataCollection";
     private const string _apiClientBase = "/ApiClient";
+    private const string _oDataApiBase = "/ODataApi";
     private const string _imagesBase = "/images";
     private const string _microsoftIdentityBase = "/MicrosoftIdentity";
     private const string _accountBase = "/Account";
@@ -156,6 +157,11 @@ public static class WebConstants
     public const string ApiClientServiceAuthorizationHandlerURI = $"{_documentationBase}{_apiClientBase}/ServiceAuthHandler";
 
     /// <summary>
+    /// The URI for the <see cref="BaseController"/> and <see cref="SessionInformationController"/> documentation endpoint.
+    /// </summary>
+    public const string ODataApiControllersURI = $"{_documentationBase}{_oDataApiBase}/Controllers";
+
+    /// <summary>
     /// Shows demonstrations involving the data collection on this site.
     /// </summary>
     public const string SiteDemoDataCollectionURI = $"{_demosBase}{_siteDemoBase}/DataCollection";
@@ -201,7 +207,8 @@ public static class WebConstants
         DataCollectionDataCollectionServiceURI,
         ApiClientOdataServiceCallerURI,
         ApiClientUserAuthorizationHandlerURI,
-        ApiClientServiceAuthorizationHandlerURI
+        ApiClientServiceAuthorizationHandlerURI,
+        ODataApiControllersURI
     };
 
     /// <summary>

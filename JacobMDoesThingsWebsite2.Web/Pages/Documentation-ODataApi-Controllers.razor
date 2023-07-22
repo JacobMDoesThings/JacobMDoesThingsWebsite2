@@ -1,0 +1,211 @@
+﻿@attribute [Route(ODataApiControllersURI)]
+
+<BaseForSideBarContent>
+    <HeaderForSideBarContent>
+        OData Api Controllers
+    </HeaderForSideBarContent>
+    <ContentBlockForSideBarContent>
+        My goal when designing the OData controllers is to centralize the logic
+        of how Get, Post, Patch, Del are implemented. To do this, I created a <b>BaseController</b>
+        that will house the generic methods that can be used by it's child classes to make calls necessary
+        without any redundant code. I know that that at the least, the <b>BaseController</b> will need to 
+        be modified and grown in the future, however, until the need arises this is what I am using. 
+        This solution uses <a class="hover:underline brand-color" href="https://automapper.org/"
+        target="_blank">AutoMapper</a>, click the link to find out more about it.<br /><br />
+        Check code for commentary. Here is the <b>BaseController</b>...
+    </ContentBlockForSideBarContent>
+    <CodeSnippetForSideBarContent>
+/// &lt;summary&gt;
+/// The base &lt;see cref="ODataController"/&gt; for odata controllers.
+/// &lt;/summary&gt;
+public abstract class BaseController : ODataController
+{
+    private readonly ILogger _logger;
+    public readonly DbContext _context;
+    private readonly IMapper _mapper;
+
+    /// &lt;summary&gt;
+    /// Initializes the BaseController.
+    /// &lt;/summary&gt;
+    /// &lt;param name="loggerFactory"&gt;The &lt;see cref="ILoggerFactory"/&gt;&lt;/param&gt;
+    /// &lt;param name="context"&gt;The &lt;see cref="DbContext"/&gt;&lt;/param&gt;
+    protected BaseController(ILoggerFactory loggerFactory, DbContext context, IMapper mapper)
+    {
+        // Get the ILogger, DbContext and IMapper (AutoMapper).
+        // AutoMapper is used to map dtos and entities.
+        _logger = loggerFactory.CreateLogger&lt;BaseController&gt;();
+        _context = context;
+        _mapper = mapper;
+    }
+
+    /// &lt;summary&gt;
+    /// Creates and commits single change to the orm.
+    /// &lt;/summary&gt;
+    /// &lt;typeparam name="TDTO"&gt;The &lt;see cref="BaseDTO"/&gt; representing the entity.&lt;/typeparam&gt;
+    /// &lt;typeparam name="TEntity"&gt;The &lt;see cref="BaseEntity"/&gt; type to commit/&lt;/typeparam&gt;
+    /// &lt;param name="dto"&gt;A &lt;see cref="BaseDTO"/&gt; to be converted to an entity and created.&lt;/param&gt;
+    /// &lt;returns&gt;&lt;see cref="ActionResult"/&gt;Containing a &lt;see cref="BaseDTO"/&gt; representation of the created entity.&lt;/returns&gt;
+    protected async Task&lt;ActionResult&gt; PostOneAsync&lt;TDTO, TEntity&gt;(TDTO dto)
+        where TDTO : BaseDTO
+        where TEntity : BaseEntity
+    {
+        // Ensure that the entity being passed in is valid.
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
+        }
+
+        try
+        {
+            // Map an entity from the provided dto.
+            var entity = _mapper.Map&lt;TEntity&gt;(dto);
+
+            // Add the entity that is mapped from the dto to the DbContext.
+            await _context.AddAsync(entity);
+            
+            // Save the changes to the DbContext.
+            await _context.SaveChangesAsync();
+
+            // Return the created entity mapped as a dto back to the controller to return to caller.
+            return Created(_mapper.Map&lt;TDTO&gt;(entity));
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError("Error encountered on creating record for entity of type {type}. {exception}", typeof(TEntity).Name, ex);
+            return StatusCode(StatusCodes.Status500InternalServerError);
+        }
+    }
+
+    /// &lt;summary&gt;
+    /// Gets a set of &lt;see cref="BaseDTO"/&gt;s representing queried entities.
+    /// &lt;/summary&gt;
+    /// &lt;typeparam name="TEntity"&gt;&lt;see cref="BaseEntity"/&gt;&lt;/typeparam&gt;
+    /// &lt;typeparam name="TDTO"&gt;&lt;see cref="BaseDTO"/&gt;&lt;/typeparam&gt;
+    /// &lt;returns&gt;&lt;see cref="ActionResult"/&gt;containing &lt;see cref="BaseDTO"/&gt;s requested.&lt;/returns&gt;
+    protected ActionResult&lt;IQueryable&lt;TDTO&gt;&gt; GetEntities&lt;TDTO, TEntity&gt;()
+        where TDTO : class
+        where TEntity : class
+    {
+        try
+        {
+            // Get a queryable dto to return to caller. AsNoTracking is required here because of how
+            // Comsos works with expanding owned entities. Do allow tracking, I believe I need to 
+            // create more than one container, one for the entity and others for the owned entities and
+            // use keys to manage relationships.
+            var entitySet = _mapper.ProjectTo&lt;TDTO&gt;(_context.Set&lt;TEntity&gt;()).AsNoTracking();
+            return Ok(entitySet);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError("Error encountered on getting records for entities of type {type} from database. {exception}", typeof(TEntity).Name, ex);
+            return StatusCode(StatusCodes.Status500InternalServerError);
+        }
+    }
+
+    /// &lt;summary&gt;
+    /// Gets a &lt;see cref="BaseDTO"/&gt; by Id.
+    /// &lt;/summary&gt;
+    /// &lt;typeparam name="TEntity"&gt;&lt;see cref="BaseEntity"/&gt;&lt;/typeparam&gt;
+    /// &lt;typeparam name="TDTO"&gt;&lt;see cref="BaseDTO"/&gt;&lt;/typeparam&gt;
+    /// &lt;param name="id"&gt;The unique id.&lt;/param&gt;
+    /// &lt;returns&gt;&lt;see cref="ActionResult"/&gt;containing &lt;see cref="BaseDTO"/&gt; requested.&lt;/returns&gt;
+    protected async Task&lt;IActionResult&gt; GetOneAsync&lt;TEntity, TDTO&gt;(string id)
+        where TEntity : BaseEntity
+        where TDTO : BaseDTO
+    {
+        // Same as GetEntities but returns a single instance instead of queryable.
+        try
+        {
+            TEntity? entity = (TEntity?)(await _context.FindAsync(typeof(TEntity), id));
+
+            if (entity is null)
+            {
+                return NotFound();
+            }
+
+            var dto = _mapper.Map&lt;TDTO&gt;(entity);
+            return Ok(dto);
+
+        }
+        catch (ArgumentNullException)
+        {
+            return BadRequest();
+        }
+
+        catch (Exception ex)
+        {
+            _logger.LogError("Error encountered on getting records for entities of type {type} from database. {exception}", typeof(TEntity).Name, ex);
+            return StatusCode(StatusCodes.Status500InternalServerError);
+        }
+    }
+
+}
+    </CodeSnippetForSideBarContent>
+    <ContentBlockForSideBarContent>
+        This is a basic example, I need to add better response handling and options for various types of queries. I will update when I do so.
+        Any class that extends this can now make a concrete controller for various entity types and allow for different dbcontexts if necessary.
+        Note, in the following example Authorization, Policies, Scopes etc... are omitted.
+        <br /><br />
+        Check code for commentary. The derived controller...
+    </ContentBlockForSideBarContent>
+    <CodeSnippetForSideBarContent>
+/// &lt;summary&gt;
+/// The &lt;see cref="ODataController"/&gt; responsible for managing
+/// &lt;seealso cref="SessionInformationEntity"/&gt; and &lt;seealso cref="SessionInformationDTO"/&gt;
+/// &lt;/summary&gt;
+public class SessionInformationController : BaseController
+{
+
+    ///&lt;inheritdoc/&gt;
+    public SessionInformationController(ILoggerFactory loggerFactory, JacobMDoesThingsWebsite2Context context, IMapper mapper)
+    : base(loggerFactory, context, mapper)
+    {
+    }
+
+    /// &lt;summary&gt;
+    /// The query enabled endpoint for getting &lt;see cref="SessionInformationDTO"/s&gt; converted from
+    /// &lt;seealso cref="SessionInformationEntity"/&gt;.
+    /// &lt;/summary&gt;
+    /// &lt;returns&gt;an &lt;see cref="IActionResult"/&gt; containing &lt;seealso cref="SessionInformationDTO"/&gt; information.&lt;/returns&gt;
+    [EnableQuery]
+    public ActionResult&lt;IQueryable&lt;SessionInformationDTO&gt;&gt; Get()
+    {
+        // [EnableQuery] allows OData query strings to be used in the URL.
+        // Call the parent's GetEntities with types desired...
+        // Return IQueryable in ActionResult for collections.
+        return GetEntities&lt;SessionInformationDTO, SessionInformationEntity&gt;();
+    }
+
+    /// &lt;summary&gt;
+    /// The endpoint for getting &lt;see cref="SessionInformationDTO"/&gt; by Id, converted from
+    /// &lt;seealso cref="SessionInformationEntity"/&gt;.
+    /// &lt;/summary&gt;
+    /// &lt;returns&gt;an &lt;see cref="IActionResult"/&gt; containing &lt;seealso cref="SessionInformationDTO"/&gt; information.&lt;/returns&gt;
+    [EnableQuery]
+    public async Task&lt;IActionResult&gt; Get([FromRoute] string key)
+    {
+        // [EnableQuery] allows OData query strings to be used in the URL.
+        // Call the parent's GetEntities with types desired...
+        return await GetOneAsync&lt;SessionInformationEntity, SessionInformationDTO&gt;(key);
+    }
+
+    /// &lt;summary&gt;
+    /// The endpoint for posting new &lt;see cref="SessionInformationEntity"/&gt; from a &lt;seealso cref="SessionInformationDTO"/&gt;
+    /// &lt;/summary&gt;
+    /// &lt;param name="sessionInformation"&gt;The &lt;see cref="SessionInformationDTO"/&gt; to be posted.&lt;/param&gt;
+    /// &lt;returns&gt;
+    /// An &lt;see cref="IActionResult"/&gt; containing the created &lt;see cref="SessionInformationDTO"/&gt;
+    /// converted from &lt;see cref="SessionInformationEntity"/&gt;.
+    /// &lt;/returns&gt;
+    public async Task&lt;IActionResult&gt; Post([FromBody] SessionInformationDTO sessionInformation)
+    {
+        // [EnableQuery] allows OData query strings to be used in the URL.
+        // Call the parent's GetEntities with types desired...
+        return await PostOneAsync&lt;SessionInformationDTO, SessionInformationEntity&gt;(sessionInformation);
+    }
+}
+    </CodeSnippetForSideBarContent>
+    <ContentBlockForSideBarContent>
+        Simple implementation that hopefully will be extremely flexible as this site grows.
+    </ContentBlockForSideBarContent>
+</BaseForSideBarContent>
