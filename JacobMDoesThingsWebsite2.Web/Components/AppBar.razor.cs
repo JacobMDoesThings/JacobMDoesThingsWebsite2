@@ -40,7 +40,7 @@ public partial class AppBar
     protected override async Task OnInitializedAsync()
     {
         UserInitials = (await AuthenticationStateProvider!.GetAuthenticationStateAsync()).UserInitials();
-        _authenticationStateProvider.AuthenticationStateChanged += AuthenticationStateChangedHandler;
+        AuthenticationStateProvider.AuthenticationStateChanged += AuthenticationStateChangedHandler;
         NavigationManager!.LocationChanged += (o, e) => SetLinkBGs();
 
         SetLinkBGs();

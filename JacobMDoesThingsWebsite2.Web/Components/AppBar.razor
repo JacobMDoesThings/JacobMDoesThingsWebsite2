@@ -1,6 +1,4 @@
-﻿@inject AuthenticationStateProvider _authenticationStateProvider
-
-<nav class="bg-dark z-20 w-full fixed border-b border-brand z-50">
+﻿<nav class="bg-dark z-20 w-full fixed border-b border-brand z-50">
     <div class="w-full px-2 md:px-6 lg:px-8">
         <div class="relative flex h-16 items-center justify-between">
             <div class="absolute inset-y-0 left-0 flex items-center md:hidden">
@@ -31,9 +29,9 @@
                 </div>
                 <div class="hidden md:ml-6 md:block">
                     <div class="flex space-x-4">
-                        <a href="@HomeURI" class="@_linkCss[HomeURI] text-gray-300 hover:bg-gray-700 hover:text-white rounded-md px-3 py-2 text-sm font-medium">Home</a>
-                        <a href="@DocumentationURI" class="@_linkCss[DocumentationURI] text-gray-300 hover:bg-gray-700 hover:text-white rounded-md px-3 py-2 text-sm font-medium">Documentation</a>
-                        <a href="@DemosURI" class="@_linkCss[DemosURI] text-gray-300 hover:bg-gray-700 hover:text-white rounded-md px-3 py-2 text-sm font-medium">Demos</a>
+                        <button @onclick="() => NavigationManager!.NavigateTo(HomeURI, false)" class="@_linkCss[HomeURI] text-gray-300 hover:bg-gray-700 hover:text-white rounded-md px-3 py-2 text-sm font-medium">Home</button>
+                        <button @onclick="() => NavigationManager!.NavigateTo(DocumentationURI, false)" class="@_linkCss[DocumentationURI] text-gray-300 hover:bg-gray-700 hover:text-white rounded-md px-3 py-2 text-sm font-medium">Documentation</button>
+                        <button @onclick="() => NavigationManager!.NavigateTo(DemosURI, false)" class="@_linkCss[DemosURI] text-gray-300 hover:bg-gray-700 hover:text-white rounded-md px-3 py-2 text-sm font-medium">Demos</button>
                     </div>
                 </div>
             </div>
@@ -76,7 +74,7 @@
                             </button>
                         </Authorized>
                         <NotAuthorized>
-                            <a href="@SigninURI" class="brand-color"><u>Sign-up & Sign-in</u></a>
+                            <button @onclick="() => NavigationManager!.NavigateTo(SigninURI, true)" class="brand-color"><u>Sign-up & Sign-in</u></button>
                         </NotAuthorized>
                     </AuthorizeView>
 
@@ -96,7 +94,8 @@
                     }
                     <div class="@showProfileMenuCss absolute right-0 z-10 mt-2 w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none" role="menu" aria-orientation="vertical" aria-labelledby="user-menu-button" tabindex="-1">
                         <!-- Active: "bg-gray-100", Not Active: "" -->
-                        <a @onmousedown:preventDefault @onclick:stopPropagation="true" href="@LogoutURI" class="block px-4 py-2 text-sm text-gray-700" role="menuitem" tabindex="-1" id="user-menu-item-2">Sign out</a>
+                        <button @onclick="() => NavigationManager!.NavigateTo(LogoutURI, true)" @onmousedown:preventDefault @onclick:stopPropagation="true"
+                            class="block px-4 py-2 text-sm text-gray-700" role="menuitem" tabindex="-1" id="user-menu-item-2">Sign out</button>
                     </div>
                 </div>
             </div>

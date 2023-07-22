@@ -6,22 +6,21 @@
     </HeaderForSideBarContent>
     <ContentBlockForSideBarContent>
         The DataCollectionService provides the way the site collections information like user-agent and page visits.
-        DataCollectionService leverages <a class="hover:underline brand-color" href="@DataCollectionConsentManagerURI" 
-            target="_blank">IConsentServiceManager</a>, 
-        <a class="hover:underline brand-color" href="@DataCollectionSessionUploadSchedulerServiceURI" target="_blank">ISessionUploadSchedulerService</a>,
+        DataCollectionService leverages <a class="hover:underline brand-color" href="@DataCollectionConsentManagerURI">IConsentServiceManager</a>, 
+        <a class="hover:underline brand-color" href="@DataCollectionSessionUploadSchedulerServiceURI">ISessionUploadSchedulerService</a>,
         <b>JSRuntime</b> and <b>NavigationManager</b>. It also extends the <b>CircuitHandler</b> class that is provided for managing connections and circuits.
-        I found out about the <b>CircuitHandler</b> <a class="hover:underline brand-color" 
-            href="https://stackoverflow.com/questions/61345537/detect-client-closing-connection-blazor" target="_blank">here on stackoverflow.</a>
+        I found out about the <b>CircuitHandler</b> <a class="hover:underline brand-color" target="_blank"
+            href="https://stackoverflow.com/questions/61345537/detect-client-closing-connection-blazor">here on stackoverflow.</a>
         <br /><br />
 
         This service requires four methods to function: one function for when a connection is up, another for when a circuit is closed, 
         a <b>NavigationManager</b> change event handler for recording page navigation and finally, a method that subscribes to <a class="hover:underline brand-color" 
-        href="@DataCollectionConsentManagerURI" target="_blank">IConsentServiceManager</a> <b>OnPropertyChange</b> event for the
+        href="@DataCollectionConsentManagerURI">IConsentServiceManager</a> <b>OnPropertyChange</b> event for the
         user's "sessionid" (The id stored in <b>ProtectedLocalStorage</b> to track returning users).
         <br /><br />
         <b>
             *** This feature no longer uses SessionUploadSchedulerService, instead it calls <a class="hover:underline brand-color"
-             href="@ApiClientOdataServiceCallerURI" target="_blank">OdataServiceCaller</a> directly. ***
+             href="@ApiClientOdataServiceCallerURI">OdataServiceCaller</a> directly. ***
         </b>
         <br/>
         <br/>
@@ -76,11 +75,11 @@ protected void NavigationManagerLocationChangeHandler(object? sender, EventArgs 
         Because I have a system for request consent for data collection I need to have a method for ensuring I only
         collect the long-running "TrackingId" for tracking between sessions when a user has given consent and hasn't 
         revoked consent. Initially, I tried to get the value from the <a class="hover:underline brand-color"
-         href="@DataCollectionConsentManagerURI" target="_blank">IConsentServiceManager</a> in the OnCircuitClosedAsync event.
+         href="@DataCollectionConsentManagerURI">IConsentServiceManager</a> in the OnCircuitClosedAsync event.
         This proved to cause issues with the task hanging and not completing the call to upload the data.
         <br/><br />
         This was solved by having the <a class="hover:underline brand-color"
-        href="@DataCollectionConsentManagerURI" target="_blank">IConsentServiceManager</a> implement the <b>INotifyPropertyChanged</b> interface. Now I can extend the
+        href="@DataCollectionConsentManagerURI">IConsentServiceManager</a> implement the <b>INotifyPropertyChanged</b> interface. Now I can extend the
         PropertyChanged event and update local variables accordingly. Here is what this looks like.<br/><br/>
     </ContentBlockForSideBarContent>
     <CodeSnippetForSideBarContent>
