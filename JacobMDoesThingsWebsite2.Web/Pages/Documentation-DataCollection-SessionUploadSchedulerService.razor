@@ -7,10 +7,10 @@
     </HeaderForSideBarContent>
     <ContentBlockForSideBarContent>
         The SessionUploadSchedulerService is responsible for posting user data to the configured API. This service works by allowing the
-        <a class="hover:underline brand-color" href="@DataCollectionDataCollectionServiceURI" target="_blank">DataCollectionService</a> to 
+        <a class="hover:underline brand-color" href="@DataCollectionDataCollectionServiceURI">DataCollectionService</a> to 
         add a SessionInformation model to a queue, then at specified intervals, this service posts each model to the 
         <a class="hover:underline brand-color"
-           href="@ApiClientOdataServiceCallerURI" target="_blank">OdataServiceCaller</a>.
+           href="@ApiClientOdataServiceCallerURI">OdataServiceCaller</a>.
         <br /><br />
         Here is a brief example...
     </ContentBlockForSideBarContent>
@@ -47,7 +47,7 @@ private void StartUploadSessionsService()
         <br /><br />
         The StartUploadSessionsService method is where the magic happens. Every 30 seconds via a <b>Timer</b>. The system iterates through the dictionary of ids and DTOs
         posting each DTO to the service via PostSesssionInformationAsync <a class="hover:underline brand-color"
-        href="@ApiClientOdataServiceCallerURI" target="_blank">OdataServiceCaller</a>. Since I am not concerned with lost data, I haven't provided
+        href="@ApiClientOdataServiceCallerURI">OdataServiceCaller</a>. Since I am not concerned with lost data, I haven't provided
         a failsafe to clear the dictionary after each call. I strongly suggest not doing this with important processes and data. This is all there is to this service.
     </ContentBlockForSideBarContent>
 </BaseForSideBarContent>

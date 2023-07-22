@@ -38,7 +38,7 @@
     </CodeSnippetForSideBarContent>
     <ContentBlockForSideBarContent>
         The next issue took me a while to figure out. At first I tried using <b>ITokenAcquisition</b> like I did for 
-        <a class="hover:underline brand-color" href="@ApiClientUserAuthorizationHandlerURI" target="_blank">user authorization.</a>
+        <a class="hover:underline brand-color" href="@ApiClientUserAuthorizationHandlerURI">user authorization.</a>
         The issue is that for this to work <b>GetAccessTokenForAppAsync</b> requires that a Tenant Id is provided, except when 
         providing the Tenant Id an exception is thrown stating that you can only use Tenant Id for Azure AD tenants. I unfortunately
         chased a few red herrings, one of which is <b>DownstreamApi</b> which allows you to call Apis differently. <b>DownstreamApi</b> appears
@@ -152,7 +152,7 @@ public class ServiceAuthorizationHandler : DelegatingHandler
     <ContentBlockForSideBarContent>
         First, let me point out that this is a <b>DelegatingHandler</b> for intercepting calls for a <b>HttpClient</b>,
         more information on how this is used is 
-        <a class="hover:underline brand-color" href="@ApiClientUserAuthorizationHandlerURI" target="_blank">here</a>. Now, we
+        <a class="hover:underline brand-color" href="@ApiClientUserAuthorizationHandlerURI">here</a>. Now, we
         can go over the SendMessageAsync method that is provided by the <b>DelegatingHandler</b> parent class. Here we check
         if we have a valid authorization header ready and if not we post to our authorization endpoint asking for a token with
         provided credentials and apply the result to variables for storage. After we the token check we add the token we have

@@ -8,8 +8,8 @@
         I use a <b>DelegatingHandler</b> for making protected Api calls. This handler is used to intercept
         calls from a <b>HttpClient</b> and add appropriate authorization headers. The <b>DelegatingHandler</b>
         for signed-in users requires a token to be cached, an example on configuring authorization can be found 
-        <a class="hover:underline brand-color" href="@AuthZAuthNOptionAuthenticationWithIdentityURI" target="_blank">here</a>, 
-        and another <a class="hover:underline brand-color" href="@AuthZAuthNRequireAuthenticationURI" target="_blank">here.</a>
+        <a class="hover:underline brand-color" href="@AuthZAuthNOptionAuthenticationWithIdentityURI">here</a>, 
+        and another <a class="hover:underline brand-color" href="@AuthZAuthNRequireAuthenticationURI">here.</a>
         These tokens can be accessed via the <b>ITokenAcquistion</b> interface. Here is a basic example of what this looks like. 
     </ContentBlockForSideBarContent>
     <CodeSnippetForSideBarContent>
@@ -43,7 +43,7 @@ public class UserAuthorizationHandler : DelegatingHandler
     <ContentBlockForSideBarContent>
         That is all there is to it, you probably want to add some exception handling and logging here, particularly when you are attempting to retrieve the
         token with GetAccessTokenForUserAsync. This is how I use this handler in my CompositionRoot / Program file. The UserOdataServiceCaller can be found 
-        <a class="hover:underline brand-color" href="@ApiClientOdataServiceCallerURI" target="_blank">here.</a> Don't let naming confuse you, I have service
+        <a class="hover:underline brand-color" href="@ApiClientOdataServiceCallerURI">here.</a> Don't let naming confuse you, I have service
         callers for both my server and signed-in users, the interface below and it's implementation are just representations of what I linked above.
     </ContentBlockForSideBarContent>
     <CodeSnippetForSideBarContent>
